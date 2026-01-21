@@ -15,18 +15,18 @@ app.post("/api", async (req, res) => {
   try {
     const r = await fetch(GAS_URL, {
       method: "POST",
-      // IMPORTANT for Apps Script: text/plain avoids preflight/CORS issues on the server side too
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(req.body || {})
     });
 
     const text = await r.text();
     res.setHeader("Content-Type", "application/json; charset=utf-8");
-    res.status(200).send(text);
+    res.status(r.status).send(text);
   } catch (e) {
     res.status(500).json({ ok: false, error: String(e) });
   }
 });
+
 
 // Health check
 app.get("/health", (_req, res) => res.status(200).send("ok"));

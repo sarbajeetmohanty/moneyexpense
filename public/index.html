@@ -3949,20 +3949,25 @@ const BACKEND_URL = "/api";
     }
 
     if(t.closest("#splitConfirmBtn")){
-      const txnId = state.activeSplit?.txnId;
-      if(!txnId) return;
-      (async ()=>{
-        try{
-          await api("splitAction", { txnId, action:"CONFIRM_RECEIVED" });
-          toast("success","Confirmed received");
-          await loadTxnsScope("SPLIT",{silent:true});
-          render();
-        }catch(err){
-          toast("error","Action failed", err.message || "Backend not implemented.");
-        }
-      })();
-      return;
+  const txnId = state.activeSplit?.txnId;
+  if(!txnId) return;
+  (async ()=>{
+    try{
+      const participantUserId = prompt("Enter participantUserId to confirm received:");
+      if(!participantUserId) return;
+
+      await api("splitAction", { txnId, action:"CONFIRM_RECEIVED", participantUserId: participantUserId.trim() });
+
+      toast("success","Confirmed received");
+      await loadTxnsScope("SPLIT",{silent:true});
+      render();
+    }catch(err){
+      toast("error","Action failed", err.message || "Please retry.");
     }
+  })();
+  return;
+}
+
   });
 
   /* ===========================
