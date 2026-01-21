@@ -1,0 +1,3999 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1220" />
+  <title>FinSplit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#070b14;
+      --panel:#0b1220;
+      --panel2:#0d172b;
+      --card:#0f1a30;
+      --card2:#0b152a;
+      --muted:#9aa6bf;
+      --text:#e8eeff;
+      --soft:#c9d3ee;
+      --line:rgba(255,255,255,.08);
+      --line2:rgba(255,255,255,.12);
+      --shadow: 0 12px 30px rgba(0,0,0,.45);
+      --shadow2: 0 10px 18px rgba(0,0,0,.35);
+      --radius:16px;
+      --radius2:22px;
+      --success:#27d8a6;
+      --warn:#ffcc66;
+      --danger:#ff5c7a;
+      --info:#64b5ff;
+      --brand:#7c5cff;
+      --brand2:#22c7ff;
+      --brand3:#12ffa3;
+      --chip:#142549;
+      --chip2:#0f203e;
+      --focus: 0 0 0 4px rgba(124,92,255,.18);
+      --glass: rgba(255,255,255,.06);
+      --glass2: rgba(255,255,255,.08);
+      --grad: radial-gradient(1200px 700px at 20% -10%, rgba(124,92,255,.22), transparent 60%),
+              radial-gradient(1000px 700px at 120% 20%, rgba(34,199,255,.16), transparent 55%),
+              radial-gradient(900px 700px at 40% 120%, rgba(18,255,163,.10), transparent 60%);
+      --mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x:hidden;
+    }
+    a{color:inherit}
+    button,input,select,textarea{font-family:inherit}
+    input,select,textarea{
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 12px;
+      outline: none;
+      width:100%;
+      transition: border .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+    input:focus,select:focus,textarea:focus{border-color: rgba(124,92,255,.55); box-shadow: var(--focus); background: rgba(255,255,255,.05)}
+    textarea{min-height:88px; resize:vertical}
+    select{appearance:none; background-image: linear-gradient(45deg,transparent 50%,rgba(255,255,255,.7) 50%),linear-gradient(135deg,rgba(255,255,255,.7) 50%,transparent 50%); background-position: calc(100% - 16px) calc(50% - 4px),calc(100% - 11px) calc(50% - 4px); background-size: 6px 6px,6px 6px; background-repeat:no-repeat; padding-right:34px}
+    .app-bg{
+      position:fixed; inset:0;
+      background: var(--grad);
+      pointer-events:none;
+    }
+    .shell{
+      position:relative;
+      min-height:100%;
+      display:flex;
+    }
+    .sidebar{
+      width: 272px;
+      background: rgba(11,18,32,.62);
+      border-right: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      padding: 18px 14px;
+      display:none;
+      flex-direction:column;
+      gap:14px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding: 10px 10px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(124,92,255,.18), rgba(34,199,255,.10));
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow2);
+    }
+    .brand-left{display:flex; align-items:center; gap:10px}
+    .brand-logo{
+      width:38px;height:38px;border-radius:12px;
+      background: radial-gradient(circle at 25% 25%, rgba(255,255,255,.35), rgba(255,255,255,.08) 45%, rgba(0,0,0,.15));
+      border: 1px solid rgba(255,255,255,.18);
+      display:grid;place-items:center;
+      overflow:hidden;
+    }
+    .brand-name{font-weight:800; letter-spacing:.2px}
+    .brand-sub{font-size:12px; color: var(--muted); margin-top:2px}
+    .pill{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.10);
+      color: var(--soft);
+      display:flex;
+      align-items:center;
+      gap:7px;
+    }
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      padding: 6px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+    }
+    .nav a{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 10px 10px;
+      border-radius: 14px;
+      color: var(--soft);
+      text-decoration:none;
+      transition: background .15s ease, transform .15s ease, color .15s ease, border .15s ease;
+      border: 1px solid transparent;
+      user-select:none;
+    }
+    .nav a:hover{background: rgba(255,255,255,.05); transform: translateY(-1px)}
+    .nav a.active{
+      background: linear-gradient(135deg, rgba(124,92,255,.22), rgba(34,199,255,.10));
+      color: var(--text);
+      border-color: rgba(255,255,255,.12);
+      box-shadow: 0 10px 18px rgba(0,0,0,.25);
+    }
+    .nav .ico{width:20px;height:20px; opacity:.95}
+    .nav-footer{
+      margin-top:auto;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      padding: 0 6px 6px;
+    }
+    .mini-card{
+      border-radius: 16px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+      padding: 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .mini-name{font-weight:700; font-size:13px}
+    .mini-meta{font-size:12px; color: var(--muted); margin-top:2px}
+    .avatar{
+      width:38px;height:38px;border-radius:14px;
+      background: linear-gradient(135deg, rgba(124,92,255,.25), rgba(34,199,255,.18));
+      border:1px solid rgba(255,255,255,.14);
+      overflow:hidden;
+      display:grid; place-items:center;
+      flex:0 0 auto;
+    }
+    .avatar img{width:100%; height:100%; object-fit:cover; display:block}
+    .content{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+    }
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      padding: 14px 14px 12px;
+      background: rgba(7,11,20,.55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar-inner{
+      max-width: 1220px;
+      margin: 0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .titleblock{display:flex; align-items:center; gap:12px; min-width:0}
+    .hamburger{
+      width:42px;height:42px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      display:grid; place-items:center;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border .12s ease;
+    }
+    .hamburger:hover{transform: translateY(-1px); background: rgba(255,255,255,.055); border-color: rgba(255,255,255,.12)}
+    .hamburger svg{width:20px;height:20px}
+    .pagetitle{display:flex; flex-direction:column; min-width:0}
+    .pagetitle .h1{font-weight:800; font-size:16px; letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .pagetitle .h2{font-size:12px; color: var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .actions{display:flex; align-items:center; gap:10px}
+    .iconbtn{
+      width:42px;height:42px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      display:grid; place-items:center;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border .12s ease, opacity .12s ease;
+      user-select:none;
+      position:relative;
+    }
+    .iconbtn:hover{transform: translateY(-1px); background: rgba(255,255,255,.055); border-color: rgba(255,255,255,.12)}
+    .iconbtn:active{transform: translateY(0)}
+    .iconbtn[disabled]{opacity:.55; cursor:not-allowed; transform:none}
+    .iconbtn svg{width:20px;height:20px}
+    .badge{
+      position:absolute;
+      top:7px; right:7px;
+      min-width:18px;
+      height:18px;
+      padding:0 6px;
+      border-radius:999px;
+      background: var(--danger);
+      color:#fff;
+      font-size:11px;
+      display:grid; place-items:center;
+      border: 2px solid rgba(7,11,20,.9);
+      font-weight:800;
+    }
+    .main{
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 14px 14px 86px;
+      width:100%;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+    }
+    .card{
+      border-radius: var(--radius2);
+      background: rgba(15,26,48,.62);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+      position:relative;
+    }
+    .card::before{
+      content:"";
+      position:absolute; inset:0;
+      background: radial-gradient(700px 250px at 10% 0%, rgba(124,92,255,.12), transparent 55%),
+                  radial-gradient(700px 250px at 90% 10%, rgba(34,199,255,.10), transparent 55%);
+      pointer-events:none;
+      opacity:.8;
+    }
+    .card > *{position:relative}
+    .card-h{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      padding: 16px 16px 10px;
+    }
+    .card-title{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      min-width:0;
+    }
+    .card-title .t1{font-weight:800; font-size:14px; letter-spacing:.2px}
+    .card-title .t2{font-size:12px; color: var(--muted); line-height:1.35}
+    .card-b{
+      padding: 0 16px 16px;
+    }
+    .row{display:flex; gap:10px; align-items:center}
+    .row.wrap{flex-wrap:wrap}
+    .sp{justify-content:space-between}
+    .muted{color: var(--muted)}
+    .small{font-size:12px}
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(20,37,73,.75);
+      border: 1px solid rgba(255,255,255,.10);
+      font-size:12px;
+      color: var(--soft);
+      user-select:none;
+      max-width:100%;
+    }
+    .chip strong{color: var(--text); font-weight:800}
+    .chip.good{background: rgba(39,216,166,.12); border-color: rgba(39,216,166,.22); color: rgba(220,255,248,.98)}
+    .chip.bad{background: rgba(255,92,122,.12); border-color: rgba(255,92,122,.22); color: rgba(255,232,238,.98)}
+    .chip.neutral{background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.10); color: var(--soft)}
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:9px;
+      border-radius: 14px;
+      padding: 11px 14px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--line);
+      color: var(--text);
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border .12s ease, opacity .12s ease;
+      user-select:none;
+      font-weight:700;
+      letter-spacing:.15px;
+      text-decoration:none;
+      line-height:1;
+    }
+    .btn:hover{transform: translateY(-1px); background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.12)}
+    .btn:active{transform: translateY(0)}
+    .btn[disabled]{opacity:.55; cursor:not-allowed; transform:none}
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(124,92,255,.95), rgba(34,199,255,.55));
+      border-color: rgba(255,255,255,.16);
+      box-shadow: 0 14px 26px rgba(124,92,255,.18);
+    }
+    .btn.primary:hover{background: linear-gradient(135deg, rgba(124,92,255,1), rgba(34,199,255,.68))}
+    .btn.danger{
+      background: rgba(255,92,122,.12);
+      border-color: rgba(255,92,122,.25);
+      color: rgba(255,232,238,.98);
+    }
+    .btn.ghost{background: transparent}
+    .btn.small{padding: 9px 12px; border-radius: 12px; font-size:12px}
+    .btnblock{width:100%}
+    .split{
+      height:1px;
+      background: var(--line);
+      margin: 12px 0;
+    }
+    .kpis{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+    }
+    .kpi{
+      border-radius: var(--radius2);
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+      padding: 14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      overflow:hidden;
+      position:relative;
+    }
+    .kpi::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background: radial-gradient(500px 200px at 10% 10%, rgba(124,92,255,.18), transparent 60%),
+                  radial-gradient(500px 200px at 80% 20%, rgba(34,199,255,.14), transparent 60%);
+      opacity:.6;
+      pointer-events:none;
+    }
+    .kpi > *{position:relative}
+    .kpi-top{display:flex; align-items:center; justify-content:space-between; gap:10px}
+    .kpi-label{font-size:12px; color: var(--muted); font-weight:700; letter-spacing:.2px}
+    .kpi-amt{font-weight:900; font-size:18px; letter-spacing:.2px}
+    .kpi-amt.positive{color: rgba(220,255,248,.98)}
+    .kpi-amt.negative{color: rgba(255,232,238,.98)}
+    .kpi-sub{font-size:12px; color: var(--muted); display:flex; align-items:center; gap:8px}
+    .dot{width:8px;height:8px;border-radius:99px; background: rgba(255,255,255,.22)}
+    .dot.good{background: rgba(39,216,166,.9)}
+    .dot.bad{background: rgba(255,92,122,.9)}
+    .dot.warn{background: rgba(255,204,102,.95)}
+    .progress{
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      overflow:hidden;
+      position:relative;
+    }
+    .progress > div{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(124,92,255,.95), rgba(34,199,255,.70), rgba(18,255,163,.55));
+      border-radius: 999px;
+      transition: width .25s ease;
+    }
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .item{
+      border-radius: 18px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+      padding: 12px;
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      justify-content:space-between;
+      transition: transform .12s ease, background .12s ease, border .12s ease;
+      cursor:pointer;
+      user-select:none;
+    }
+    .item:hover{transform: translateY(-1px); background: rgba(255,255,255,.055); border-color: rgba(255,255,255,.12)}
+    .item:active{transform: translateY(0)}
+    .item-left{display:flex; gap:10px; min-width:0}
+    .item-main{display:flex; flex-direction:column; gap:4px; min-width:0}
+    .item-title{font-weight:850; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .item-sub{font-size:12px; color: var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .item-right{display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex:0 0 auto}
+    .amt{font-weight:900; letter-spacing:.2px}
+    .amt.good{color: rgba(220,255,248,.98)}
+    .amt.bad{color: rgba(255,232,238,.98)}
+    .amt.neutral{color: var(--soft)}
+    .hint{
+      font-size:12px;
+      color: rgba(255,255,255,.72);
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+      border-radius: 14px;
+      line-height:1.35;
+    }
+    .form{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .fgrid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+    .frow{
+      display:flex;
+      flex-direction:column;
+      gap:7px;
+    }
+    .label{
+      font-size:12px;
+      color: var(--muted);
+      font-weight:700;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .err{
+      font-size:12px;
+      color: rgba(255,92,122,.95);
+      font-weight:700;
+      margin-top:2px;
+    }
+    .ok{
+      font-size:12px;
+      color: rgba(39,216,166,.95);
+      font-weight:800;
+      margin-top:2px;
+    }
+    .inline{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .imgprev{
+      display:flex; gap:10px; align-items:center;
+      border-radius: 16px;
+      padding: 10px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+    }
+    .imgprev img{width:64px;height:64px;border-radius:14px;object-fit:cover;border:1px solid rgba(255,255,255,.12)}
+    .imgprev .meta{display:flex; flex-direction:column; gap:4px; min-width:0}
+    .imgprev .meta .m1{font-weight:800; font-size:12px}
+    .imgprev .meta .m2{font-size:12px; color: var(--muted)}
+    .tabs{
+      display:flex;
+      gap:8px;
+      padding: 6px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+      width:max-content;
+      max-width:100%;
+      overflow:auto;
+    }
+    .tab{
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--soft);
+      cursor:pointer;
+      user-select:none;
+      font-weight:800;
+      font-size:12px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+      transition: background .12s ease, border .12s ease, transform .12s ease, color .12s ease;
+    }
+    .tab:hover{background: rgba(255,255,255,.05); transform: translateY(-1px)}
+    .tab.active{
+      background: linear-gradient(135deg, rgba(124,92,255,.22), rgba(34,199,255,.10));
+      border-color: rgba(255,255,255,.12);
+      color: var(--text);
+    }
+    .bottomnav{
+      position:fixed;
+      left:0; right:0; bottom:0;
+      z-index:30;
+      padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+      background: rgba(7,11,20,.65);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-top: 1px solid var(--line);
+      display:flex;
+      justify-content:center;
+    }
+    .bottomnav-inner{
+      width:min(680px, 100%);
+      display:grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap:8px;
+    }
+    .bnav{
+      border-radius: 16px;
+      padding: 10px 8px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+      color: var(--soft);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .12s ease, background .12s ease, border .12s ease, color .12s ease;
+      position:relative;
+    }
+    .bnav:hover{transform: translateY(-1px); background: rgba(255,255,255,.055); border-color: rgba(255,255,255,.12)}
+    .bnav.active{
+      background: linear-gradient(135deg, rgba(124,92,255,.24), rgba(34,199,255,.11));
+      border-color: rgba(255,255,255,.12);
+      color: var(--text);
+    }
+    .bnav svg{width:20px;height:20px}
+    .bnav span{font-size:11px; font-weight:800}
+    .bnav .nbadge{
+      position:absolute;
+      top:8px; right:12px;
+      width:9px; height:9px;
+      border-radius:99px;
+      background: var(--danger);
+      border:2px solid rgba(7,11,20,.95);
+      display:none;
+    }
+    .bnav.hasNotif .nbadge{display:block}
+    .toastwrap{
+      position:fixed;
+      left:12px;
+      right:12px;
+      bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+      z-index:50;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      pointer-events:none;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .toast{
+      pointer-events:auto;
+      border-radius: 18px;
+      padding: 12px 12px;
+      background: rgba(15,26,48,.88);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow);
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      animation: toastIn .18s ease-out;
+    }
+    @keyframes toastIn{from{transform: translateY(8px); opacity:.0} to{transform: translateY(0); opacity:1}}
+    .toast .ticon{
+      width:36px;height:36px;border-radius:14px;
+      display:grid; place-items:center;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      flex:0 0 auto;
+    }
+    .toast.good .ticon{background: rgba(39,216,166,.12); border-color: rgba(39,216,166,.22)}
+    .toast.bad .ticon{background: rgba(255,92,122,.12); border-color: rgba(255,92,122,.22)}
+    .toast.info .ticon{background: rgba(100,181,255,.12); border-color: rgba(100,181,255,.22)}
+    .toast .tmain{display:flex; flex-direction:column; gap:4px; min-width:0}
+    .toast .tmsg{font-size:13px; font-weight:800}
+    .toast .tsub{font-size:12px; color: var(--muted); line-height:1.35}
+    .toast .tclose{
+      margin-left:auto;
+      width:34px;height:34px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      display:grid; place-items:center;
+      cursor:pointer;
+      transition: background .12s ease, transform .12s ease;
+      flex:0 0 auto;
+    }
+    .toast .tclose:hover{background: rgba(255,255,255,.06); transform: translateY(-1px)}
+    .toast .tclose svg{width:18px;height:18px}
+    .modalwrap{
+      position:fixed;
+      inset:0;
+      z-index:60;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 14px;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .modalwrap.open{display:flex}
+    .modal{
+      width:min(720px, 100%);
+      border-radius: 22px;
+      background: rgba(11,18,32,.86);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .modal-h{
+      padding: 14px 16px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+    }
+    .modal-title{display:flex; flex-direction:column; gap:4px}
+    .modal-title .m1{font-weight:900; font-size:14px}
+    .modal-title .m2{font-size:12px; color: var(--muted); line-height:1.35}
+    .modal-x{
+      width:40px;height:40px;border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      display:grid;place-items:center;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border .12s ease;
+      user-select:none;
+      flex:0 0 auto;
+    }
+    .modal-x:hover{transform: translateY(-1px); background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.12)}
+    .modal-x svg{width:20px;height:20px}
+    .modal-b{padding: 14px 16px 16px}
+    .modal-f{
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      padding: 12px 16px 16px;
+      border-top: 1px solid var(--line);
+      background: rgba(255,255,255,.02);
+      flex-wrap:wrap;
+    }
+    .overlay{
+      position:fixed;
+      inset:0;
+      z-index:70;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 16px;
+    }
+    .overlay.show{display:flex}
+    .spinnerCard{
+      border-radius: 22px;
+      background: rgba(11,18,32,.86);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow);
+      padding: 16px 18px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width: 220px;
+    }
+    .spin{
+      width:28px;height:28px;
+      border-radius:99px;
+      border: 3px solid rgba(255,255,255,.14);
+      border-top-color: rgba(124,92,255,.95);
+      animation: spin 1s linear infinite;
+      flex:0 0 auto;
+    }
+    @keyframes spin{to{transform: rotate(360deg)}}
+    .skel{
+      border-radius: 18px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+      padding: 12px;
+      overflow:hidden;
+      position:relative;
+    }
+    .skel::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent);
+      transform: translateX(-100%);
+      animation: shimmer 1.1s ease-in-out infinite;
+    }
+    @keyframes shimmer{to{transform: translateX(100%)}}
+    .skline{height:10px; border-radius:999px; background: rgba(255,255,255,.06); margin: 8px 0}
+    .skline.w60{width:60%}
+    .skline.w40{width:40%}
+    .skline.w80{width:80%}
+    .skline.w30{width:30%}
+    .twoCol{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+    }
+    .threeCol{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+    }
+    .notice{
+      border-radius: 18px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+      padding: 12px;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .notice .nIco{
+      width:36px;height:36px;border-radius:14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      display:grid;place-items:center;
+      flex:0 0 auto;
+    }
+    .notice .nTxt{display:flex; flex-direction:column; gap:4px}
+    .notice .nT{font-weight:900; font-size:13px}
+    .notice .nB{font-size:12px; color: var(--muted); line-height:1.35}
+    .mono{font-family: var(--mono)}
+    .divider{
+      height:1px;
+      background: var(--line);
+      margin: 10px 0;
+    }
+    .stickyActions{
+      position:sticky;
+      bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      padding-top: 8px;
+      z-index:10;
+    }
+    .authwrap{
+      min-height: calc(100vh - 86px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 20px 14px 96px;
+    }
+    .authcard{
+      width:min(520px, 100%);
+      border-radius: 26px;
+      background: rgba(11,18,32,.72);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .authhead{
+      padding: 16px 16px 12px;
+      background: linear-gradient(135deg, rgba(124,92,255,.20), rgba(34,199,255,.10));
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    .authhead .a1{font-weight:950; font-size:16px; letter-spacing:.25px}
+    .authhead .a2{font-size:12px; color: var(--soft); opacity:.85; margin-top:4px; line-height:1.35}
+    .authbody{padding: 14px 16px 16px}
+    .footerline{
+      font-size:12px;
+      color: var(--muted);
+      text-align:center;
+      padding: 12px 12px 14px;
+      border-top: 1px solid var(--line);
+      background: rgba(255,255,255,.02);
+    }
+    .drawer{
+      position:fixed;
+      inset:0;
+      z-index:40;
+      display:none;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .drawer.open{display:block}
+    .drawerPanel{
+      position:absolute;
+      top:0; bottom:0; left:0;
+      width: 292px;
+      background: rgba(11,18,32,.86);
+      border-right: 1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow);
+      padding: 14px 12px;
+      transform: translateX(-8px);
+      animation: drawerIn .16s ease-out forwards;
+    }
+    @keyframes drawerIn{to{transform: translateX(0)}}
+    .drawerTop{display:flex; align-items:center; justify-content:space-between; gap:10px; padding: 6px 6px 12px}
+    .drawerTop .dtitle{font-weight:950; letter-spacing:.2px}
+    .drawerClose{
+      width:40px;height:40px;border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      display:grid; place-items:center;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .12s ease, background .12s ease;
+    }
+    .drawerClose:hover{transform: translateY(-1px); background: rgba(255,255,255,.06)}
+    .drawerClose svg{width:20px;height:20px}
+    .seg{
+      display:flex;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      overflow:hidden;
+      width:max-content;
+      max-width:100%;
+    }
+    .seg button{
+      border:0;
+      background: transparent;
+      color: var(--soft);
+      padding: 10px 12px;
+      cursor:pointer;
+      user-select:none;
+      font-weight:900;
+      font-size:12px;
+      transition: background .12s ease, color .12s ease;
+    }
+    .seg button.active{
+      background: linear-gradient(135deg, rgba(124,92,255,.22), rgba(34,199,255,.10));
+      color: var(--text);
+    }
+    .pill2{
+      font-size:12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.10);
+      color: var(--soft);
+    }
+    .hr{
+      height:1px;
+      background: var(--line);
+      margin: 12px 0;
+    }
+    .rightNote{
+      border-radius: 18px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+      padding: 12px;
+    }
+    .rightNote .rt{font-weight:900; font-size:13px}
+    .rightNote .rb{font-size:12px; color: var(--muted); margin-top:6px; line-height:1.35}
+    .chipInput{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      padding: 10px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+    }
+    .chipInput input{
+      border:0;
+      background: transparent;
+      padding: 8px 8px;
+      min-width: 140px;
+      flex:1;
+      border-radius: 12px;
+    }
+    .chipPill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(124,92,255,.14);
+      border: 1px solid rgba(124,92,255,.22);
+      color: var(--text);
+      font-size:12px;
+      font-weight:900;
+      max-width:100%;
+    }
+    .chipPill .x{
+      width:18px;height:18px;border-radius:99px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.06);
+      display:grid;place-items:center;
+      cursor:pointer;
+      user-select:none;
+      flex:0 0 auto;
+    }
+    .chipPill .x svg{width:12px;height:12px}
+    .pillWarn{background: rgba(255,204,102,.12); border-color: rgba(255,204,102,.22); color: rgba(255,248,231,.98)}
+    .pillInfo{background: rgba(100,181,255,.12); border-color: rgba(100,181,255,.22); color: rgba(235,247,255,.98)}
+    .pillOk{background: rgba(39,216,166,.12); border-color: rgba(39,216,166,.22); color: rgba(220,255,248,.98)}
+    .pillBad{background: rgba(255,92,122,.12); border-color: rgba(255,92,122,.22); color: rgba(255,232,238,.98)}
+    .receiptBtn{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      border-radius: 16px;
+      border: 1px dashed rgba(255,255,255,.16);
+      background: rgba(255,255,255,.03);
+      padding: 12px;
+    }
+    .receiptBtn .left{display:flex; gap:10px; align-items:center; min-width:0}
+    .receiptBtn .left .i{
+      width:36px;height:36px;border-radius:14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      display:grid;place-items:center;
+      flex:0 0 auto;
+    }
+    .receiptBtn .left .t{display:flex; flex-direction:column; gap:4px; min-width:0}
+    .receiptBtn .left .t .t1{font-weight:950; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .receiptBtn .left .t .t2{font-size:12px; color: var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .receiptBtn input{display:none}
+    .statePill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size:12px;
+      font-weight:900;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      color: var(--soft);
+    }
+    .statePill.good{background: rgba(39,216,166,.12); border-color: rgba(39,216,166,.22); color: rgba(220,255,248,.98)}
+    .statePill.warn{background: rgba(255,204,102,.12); border-color: rgba(255,204,102,.22); color: rgba(255,248,231,.98)}
+    .statePill.bad{background: rgba(255,92,122,.12); border-color: rgba(255,92,122,.22); color: rgba(255,232,238,.98)}
+    .statePill.info{background: rgba(100,181,255,.12); border-color: rgba(100,181,255,.22); color: rgba(235,247,255,.98)}
+    .splitline{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .splitline:last-child{border-bottom:0}
+    .splitline .l{display:flex; flex-direction:column; gap:3px; min-width:0}
+    .splitline .l .t{font-weight:900; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .splitline .l .s{font-size:12px; color: var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .splitline .r{display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex:0 0 auto}
+    .safe{opacity:.92}
+    @media (min-width: 920px){
+      .sidebar{display:flex}
+      .bottomnav{display:none}
+      .topbar{padding: 14px 18px 12px}
+      .main{padding: 16px 18px 28px}
+      .hamburger{display:none}
+      .grid{grid-template-columns: 1.2fr .8fr; gap:14px}
+      .twoCol{grid-template-columns: 1fr 1fr}
+      .threeCol{grid-template-columns: 1fr 1fr 1fr}
+      .kpis{grid-template-columns: 1fr 1fr 1fr}
+      .fgrid{grid-template-columns: 1fr 1fr}
+      .stickyActions{bottom: 12px}
+      .toastwrap{bottom: 14px; left:auto; right:14px; margin:0; max-width: 460px}
+      .authwrap{min-height: calc(100vh - 0px)}
+    }
+  </style>
+</head>
+<body>
+  <div class="app-bg"></div>
+  <div id="drawer" class="drawer" aria-hidden="true">
+    <div class="drawerPanel" role="dialog" aria-modal="true" aria-label="Menu">
+      <div class="drawerTop">
+        <div class="dtitle">FinSplit</div>
+        <div class="drawerClose" id="drawerClose" role="button" tabindex="0" aria-label="Close menu">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M7 7l10 10M17 7L7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+      <div id="drawerNav"></div>
+      <div class="nav-footer">
+        <div class="mini-card">
+          <div style="min-width:0">
+            <div class="mini-name" id="drawerUserName">Guest</div>
+            <div class="mini-meta" id="drawerUserMeta">Not signed in</div>
+          </div>
+          <div class="avatar" id="drawerAvatar"></div>
+        </div>
+        <button class="btn danger btnblock" id="drawerLogoutBtn" style="display:none">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-left">
+          <div class="brand-logo" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M7.2 12.2c1.3-3.2 3.1-5 5.4-5 3 0 4.8 2.5 5.6 7.5" stroke="rgba(255,255,255,.92)" stroke-width="2" stroke-linecap="round"/>
+              <path d="M6.6 16.7c1.2.9 2.8 1.3 4.8 1.3 4.2 0 6.5-2 6.9-6" stroke="rgba(255,255,255,.72)" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="7.6" cy="12.1" r="1.2" fill="rgba(34,199,255,.95)"/>
+              <circle cx="17.7" cy="14.4" r="1.2" fill="rgba(18,255,163,.9)"/>
+            </svg>
+          </div>
+          <div style="min-width:0">
+            <div class="brand-name">FinSplit</div>
+            <div class="brand-sub" id="sideSub">Smart expense dashboard</div>
+          </div>
+        </div>
+        <div class="pill" id="sideStatus">
+          <span class="dot warn"></span>
+          <span id="sideStatusText">Offline</span>
+        </div>
+      </div>
+
+      <div id="sideNav"></div>
+
+      <div class="nav-footer">
+        <div class="mini-card" id="sideUserCard">
+          <div style="min-width:0">
+            <div class="mini-name" id="sideUserName">Guest</div>
+            <div class="mini-meta" id="sideUserMeta">Not signed in</div>
+          </div>
+          <div class="avatar" id="sideAvatar"></div>
+        </div>
+        <button class="btn danger btnblock" id="sideLogoutBtn" style="display:none">Logout</button>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="topbar">
+        <div class="topbar-inner">
+          <div class="titleblock">
+            <div class="hamburger" id="hamburger" role="button" tabindex="0" aria-label="Open menu">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <div class="pagetitle">
+              <div class="h1" id="pageTitle">Welcome</div>
+              <div class="h2" id="pageSubtitle">Sign in to continue</div>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="iconbtn" id="refreshBtn" aria-label="Refresh" title="Refresh">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M20 12a8 8 0 1 1-2.34-5.66" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M20 4v6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="iconbtn" id="notifBtn" aria-label="Notifications" title="Notifications">
+              <span class="badge" id="notifBadge" style="display:none">0</span>
+              <svg viewBox="0 0 24 24" fill="none"><path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 7h18s-3 0-3-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="iconbtn" id="profileBtn" aria-label="Profile menu" title="Profile">
+              <div class="avatar" style="width:38px;height:38px;border-radius:14px;border:0;background:transparent" id="topAvatar"></div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="main" id="app"></div>
+
+      <div class="bottomnav" id="bottomNav" aria-label="Bottom navigation">
+        <div class="bottomnav-inner">
+          <div class="bnav" data-nav="home" role="button" tabindex="0">
+            <div class="nbadge"></div>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M3 10.5l9-7 9 7V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1v-9.5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            <span>Home</span>
+          </div>
+          <div class="bnav" data-nav="txns" role="button" tabindex="0">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M7 7h14M7 12h14M7 17h14M3 7h.01M3 12h.01M3 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <span>Txns</span>
+          </div>
+          <div class="bnav" data-nav="friends" role="button" tabindex="0">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M16 11c1.66 0 3-1.57 3-3.5S17.66 4 16 4s-3 1.57-3 3.5S14.34 11 16 11z" stroke="currentColor" stroke-width="2"/><path d="M8 11c1.66 0 3-1.57 3-3.5S9.66 4 8 4 5 5.57 5 7.5 6.34 11 8 11z" stroke="currentColor" stroke-width="2"/><path d="M8 13c-2.67 0-8 1.34-8 4v3h10" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M16 13c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            <span>Friends</span>
+          </div>
+          <div class="bnav" data-nav="splits" role="button" tabindex="0">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M3 12h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 7l10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".55"/><path d="M17 7L7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".55"/></svg>
+            <span>Splits</span>
+          </div>
+          <div class="bnav" data-nav="profile" role="button" tabindex="0">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <span>Profile</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toastwrap" id="toasts" aria-live="polite" aria-atomic="true"></div>
+
+  <div class="modalwrap" id="modalWrap" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Dialog">
+      <div class="modal-h">
+        <div class="modal-title">
+          <div class="m1" id="modalTitle">Dialog</div>
+          <div class="m2" id="modalSubtitle" style="display:none"></div>
+        </div>
+        <div class="modal-x" id="modalClose" role="button" tabindex="0" aria-label="Close dialog">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M7 7l10 10M17 7L7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+      <div class="modal-b" id="modalBody"></div>
+      <div class="modal-f" id="modalFooter"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay" aria-hidden="true">
+    <div class="spinnerCard">
+      <div class="spin" aria-hidden="true"></div>
+      <div>
+        <div style="font-weight:950; letter-spacing:.2px" id="overlayTitle">Loading</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px" id="overlaySub">Please wait…</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+const BACKEND_URL = "/api";
+
+    const state = {
+      view: "auth",
+      me: null,
+      categories: [],
+      txns: [],
+      notifs: [],
+      friendSummary: [],
+      activeFriend: null,
+      activeSplit: null,
+      cache: {
+        txnsByScope: { SELF: [], FRIEND: [], SPLIT: [], ALL: [] },
+        lastLoadAt: null
+      },
+      loading: {
+        boot: false,
+        global: false,
+        auth: false,
+        refresh: false,
+        categories: false,
+        txns: false,
+        notifs: false,
+        friends: false,
+        splits: false,
+        buttons: {}
+      },
+      ui: {
+        authTab: "login",
+        notifsFilter: "unread",
+        txnFilters: { direction: "ALL", mode: "ALL", category: "ALL", from: "", to: "" },
+        online: navigator.onLine,
+        drawerOpen: false
+      }
+    };
+
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    const appEl = $("#app");
+
+    const icons = {
+      check: () => `<svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      x: () => `<svg viewBox="0 0 24 24" fill="none"><path d="M7 7l10 10M17 7L7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+      info: () => `<svg viewBox="0 0 24 24" fill="none"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z" stroke="currentColor" stroke-width="2"/><path d="M12 16v-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 8h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>`,
+      warn: () => `<svg viewBox="0 0 24 24" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" stroke="currentColor" stroke-width="2"/><path d="M12 9v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 17h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>`,
+      spark: () => `<svg viewBox="0 0 24 24" fill="none"><path d="M12 2l1.5 6.2L20 10l-6.5 1.8L12 18l-1.5-6.2L4 10l6.5-1.8L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`,
+      receipt: () => `<svg viewBox="0 0 24 24" fill="none"><path d="M6 2h12v20l-2-1-2 1-2-1-2 1-2-1-2 1V2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 7h6M9 11h6M9 15h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+      phone: () => `<svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 2.08 4.18 2 2 0 0 1 4.06 2h3a2 2 0 0 1 2 1.72c.12.86.32 1.7.6 2.5a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.58-1.12a2 2 0 0 1 2.11-.45c.8.28 1.64.48 2.5.6A2 2 0 0 1 22 16.92Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      shield: () => `<svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`
+    };
+
+    function escapeHtml(s){
+      return String(s ?? "").replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
+    }
+    function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+    function formatINR(n){
+      const v = Number(n);
+      const safe = isFinite(v) ? v : 0;
+      return new Intl.NumberFormat("en-IN", { style:"currency", currency:"INR", minimumFractionDigits:2, maximumFractionDigits:2 }).format(safe);
+    }
+    function formatDateTime(iso){
+      if(!iso) return "—";
+      const d = new Date(iso);
+      if(isNaN(d.getTime())) return "—";
+      return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+    }
+    function formatDateOnly(iso){
+      if(!iso) return "—";
+      const d = new Date(iso);
+      if(isNaN(d.getTime())) return "—";
+      return d.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
+    }
+    function toInputDateTimeValue(iso){
+      const d = iso ? new Date(iso) : new Date();
+      if(isNaN(d.getTime())) return "";
+      const pad = x => String(x).padStart(2,"0");
+      const yyyy = d.getFullYear();
+      const mm = pad(d.getMonth()+1);
+      const dd = pad(d.getDate());
+      const hh = pad(d.getHours());
+      const mi = pad(d.getMinutes());
+      return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+    }
+    function fromInputDateTimeValue(v){
+      if(!v) return null;
+      const d = new Date(v);
+      if(isNaN(d.getTime())) return null;
+      return d.toISOString();
+    }
+    function isEmail(s){
+      const v = String(s||"").trim();
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    }
+    function isPhone10(s){
+      const v = String(s||"").replace(/\D/g,"");
+      return v.length === 10;
+    }
+    function isUpi(s){
+      const v = String(s||"").trim();
+      return /^[\w.\-]{2,256}@[\w.\-]{2,64}$/.test(v);
+    }
+    function strongPassword(s){
+      const v = String(s||"");
+      if(v.length < 8) return false;
+      return /[A-Za-z]/.test(v) && /[0-9]/.test(v);
+    }
+
+    const toastState = { list: [] };
+    function toast(type, message, sub=""){
+      const id = "t_" + Math.random().toString(16).slice(2) + Date.now().toString(16);
+      const t = { id, type, message, sub, at: Date.now() };
+      toastState.list.unshift(t);
+      renderToasts();
+      const ttl = type === "error" ? 5200 : 3600;
+      setTimeout(() => { removeToast(id); }, ttl);
+    }
+    function removeToast(id){
+      const idx = toastState.list.findIndex(x => x.id === id);
+      if(idx >= 0){
+        toastState.list.splice(idx,1);
+        renderToasts();
+      }
+    }
+    function renderToasts(){
+      const el = $("#toasts");
+      el.innerHTML = toastState.list.map(t=>{
+        const cls = t.type === "success" ? "good" : (t.type === "error" ? "bad" : "info");
+        const ic = t.type === "success" ? icons.check() : (t.type === "error" ? icons.x() : icons.info());
+        return `<div class="toast ${cls}">
+          <div class="ticon">${ic}</div>
+          <div class="tmain">
+            <div class="tmsg">${escapeHtml(t.message)}</div>
+            ${t.sub ? `<div class="tsub">${escapeHtml(t.sub)}</div>` : ``}
+          </div>
+          <div class="tclose" role="button" tabindex="0" data-toast-close="${t.id}" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M7 7l10 10M17 7L7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+        </div>`;
+      }).join("");
+      $$("[data-toast-close]").forEach(b=>{
+        b.onclick = () => removeToast(b.getAttribute("data-toast-close"));
+        b.onkeydown = (e) => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); b.onclick(); } };
+      });
+    }
+
+    const modalState = { open:false, critical:false, onClose:null };
+    function openModal({ title, subtitle="", bodyHtml="", footerHtml="", critical=false, onClose=null }){
+      modalState.open = true;
+      modalState.critical = !!critical;
+      modalState.onClose = typeof onClose === "function" ? onClose : null;
+      $("#modalTitle").textContent = title || "Dialog";
+      const subEl = $("#modalSubtitle");
+      if(subtitle){
+        subEl.style.display = "";
+        subEl.textContent = subtitle;
+      }else{
+        subEl.style.display = "none";
+        subEl.textContent = "";
+      }
+      $("#modalBody").innerHTML = bodyHtml || "";
+      $("#modalFooter").innerHTML = footerHtml || "";
+      const wrap = $("#modalWrap");
+      wrap.classList.add("open");
+      wrap.setAttribute("aria-hidden","false");
+      document.body.style.overflow = "hidden";
+      focusFirstModalControl();
+    }
+    function closeModal(reason="close"){
+      if(!modalState.open) return;
+      modalState.open = false;
+      const wrap = $("#modalWrap");
+      wrap.classList.remove("open");
+      wrap.setAttribute("aria-hidden","true");
+      $("#modalBody").innerHTML = "";
+      $("#modalFooter").innerHTML = "";
+      document.body.style.overflow = "";
+      const cb = modalState.onClose;
+      modalState.onClose = null;
+      modalState.critical = false;
+      if(cb) cb(reason);
+    }
+    function focusFirstModalControl(){
+      const wrap = $("#modalWrap");
+      const focusable = wrap.querySelector("input,select,textarea,button,[tabindex='0']");
+      if(focusable) setTimeout(()=>focusable.focus(), 0);
+    }
+    $("#modalClose").onclick = () => { if(!modalState.critical) closeModal("x"); };
+    $("#modalClose").onkeydown = (e) => { if((e.key==="Enter"||e.key===" ") && !modalState.critical){ e.preventDefault(); closeModal("x"); } };
+    $("#modalWrap").addEventListener("click", (e)=>{
+      if(e.target === $("#modalWrap") && !modalState.critical) closeModal("backdrop");
+    });
+    document.addEventListener("keydown", (e)=>{
+      if(e.key === "Escape" && modalState.open && !modalState.critical) closeModal("esc");
+    });
+
+    function confirmDialog({ title, message, confirmText="Confirm", cancelText="Cancel", danger=false, critical=true }){
+      return new Promise((resolve)=>{
+        const footer = `
+          <button class="btn ${danger ? "danger" : ""}" id="dlgCancel">${escapeHtml(cancelText)}</button>
+          <button class="btn primary" id="dlgOk">${escapeHtml(confirmText)}</button>
+        `;
+        openModal({
+          title,
+          subtitle: message,
+          bodyHtml: `<div class="notice"><div class="nIco">${danger ? icons.warn() : icons.info()}</div><div class="nTxt"><div class="nT">${escapeHtml(title)}</div><div class="nB">${escapeHtml(message)}</div></div></div>`,
+          footerHtml: footer,
+          critical: !!critical,
+          onClose: () => resolve(false)
+        });
+        $("#dlgCancel").onclick = () => { closeModal("cancel"); resolve(false); };
+        $("#dlgOk").onclick = () => { closeModal("ok"); resolve(true); };
+      });
+    }
+
+    function setOverlay(show, title="Loading", sub="Please wait…"){
+      const ov = $("#overlay");
+      if(show){
+        $("#overlayTitle").textContent = title;
+        $("#overlaySub").textContent = sub;
+        ov.classList.add("show");
+        ov.setAttribute("aria-hidden","false");
+      }else{
+        ov.classList.remove("show");
+        ov.setAttribute("aria-hidden","true");
+      }
+    }
+
+    function setBtnLoading(key, loading){
+      state.loading.buttons[key] = !!loading;
+      const btn = document.querySelector(`[data-bkey="${key}"]`);
+      if(btn){
+        btn.disabled = !!loading;
+        btn.innerHTML = loading ? `<div class="spin" style="width:18px;height:18px;border-width:2px"></div><span>Working</span>` : btn.getAttribute("data-label") || btn.textContent || "Submit";
+      }
+    }
+
+    function safeParseJson(text){
+      try{ return JSON.parse(text); }catch(_){ return null; }
+    }
+
+    async function api(action, payload = {}, opts = {}){
+      const timeoutMs = Number(opts.timeoutMs || 15000);
+      const noAuth = ["setup","register","login"].includes(action);
+      const userId = localStorage.getItem("userId") || "";
+      const body = Object.assign({ action }, payload || {});
+      if(!noAuth){
+        body.userId = body.userId || userId;
+        if(!body.userId) throw new Error("Session expired. Please log in again.");
+      }
+      const controller = new AbortController();
+      const t = setTimeout(()=>controller.abort(), timeoutMs);
+      let res;
+      let text = "";
+      try{
+        res = await fetch(BACKEND_URL, {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify(body),
+          signal: controller.signal
+        });
+        text = await res.text();
+      }catch(e){
+        clearTimeout(t);
+        if(e && e.name === "AbortError") throw new Error("Request timed out. Please try again.");
+        throw new Error(state.ui.online ? "Network error. Please try again." : "You appear offline. Please reconnect and retry.");
+      }finally{
+        clearTimeout(t);
+      }
+      const json = safeParseJson(text);
+      if(!json){
+        throw new Error("Unexpected server response. Please retry in a moment.");
+      }
+      if(json.ok !== true){
+        const msg = json && json.error ? String(json.error) : "Request failed.";
+        throw new Error(msg);
+      }
+      return json.data;
+    }
+
+    function setOnlinePill(){
+      const pill = $("#sideStatus");
+      const text = $("#sideStatusText");
+      const dot = pill.querySelector(".dot");
+      state.ui.online = navigator.onLine;
+      if(state.ui.online){
+        text.textContent = "Online";
+        dot.className = "dot good";
+      }else{
+        text.textContent = "Offline";
+        dot.className = "dot warn";
+      }
+    }
+    window.addEventListener("online", ()=>{ setOnlinePill(); toast("info","Back online"); });
+    window.addEventListener("offline", ()=>{ setOnlinePill(); toast("error","You’re offline","Some actions may not work until you reconnect."); });
+
+    function setPageMeta(){
+      const map = {
+        auth: { t:"Welcome", s:"Sign in to continue" },
+        home: { t:"Dashboard", s:"Balances, budget, and recent activity" },
+        txns: { t:"Transactions", s:"Track your income and spending" },
+        friends: { t:"Friends", s:"Settle up and manage shared expenses" },
+        splits: { t:"Splits", s:"Split bills with participants and track payments" },
+        notifs: { t:"Notifications", s:"Approvals, confirmations, and requests" },
+        profile: { t:"Profile", s:"Update settings, verification, and security" }
+      };
+      const m = map[state.view] || map.home;
+      $("#pageTitle").textContent = m.t;
+      const name = state.me ? (state.me.name || state.me.username || "You") : "Guest";
+      $("#pageSubtitle").textContent = state.view === "auth" ? m.s : `${name} • ${m.s}`;
+    }
+
+    function renderNav(containerEl){
+      const items = [
+        { key:"home", label:"Home", icon:`<svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M3 10.5l9-7 9 7V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1v-9.5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>` },
+        { key:"txns", label:"Transactions", icon:`<svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M7 7h14M7 12h14M7 17h14M3 7h.01M3 12h.01M3 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>` },
+        { key:"friends", label:"Friends", icon:`<svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M16 11c1.66 0 3-1.57 3-3.5S17.66 4 16 4s-3 1.57-3 3.5S14.34 11 16 11z" stroke="currentColor" stroke-width="2"/><path d="M8 11c1.66 0 3-1.57 3-3.5S9.66 4 8 4 5 5.57 5 7.5 6.34 11 8 11z" stroke="currentColor" stroke-width="2"/><path d="M8 13c-2.67 0-8 1.34-8 4v3h10" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M16 13c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>` },
+        { key:"splits", label:"Splits", icon:`<svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M12 3v18M3 12h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 7l10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".55"/><path d="M17 7L7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".55"/></svg>` },
+        { key:"profile", label:"Profile", icon:`<svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>` }
+      ];
+      const html = `<div class="nav" aria-label="Primary navigation">
+        ${items.map(it=>{
+          const active = state.view === it.key;
+          return `<a href="#" data-nav="${it.key}" class="${active ? "active":""}">
+            ${it.icon}<span style="font-weight:900">${escapeHtml(it.label)}</span>
+          </a>`;
+        }).join("")}
+      </div>`;
+      containerEl.innerHTML = html;
+      $$("[data-nav]", containerEl).forEach(a=>{
+        a.onclick = (e)=>{ e.preventDefault(); route(a.getAttribute("data-nav")); closeDrawer(); };
+      });
+    }
+
+    function renderBottomNav(){
+      const unread = countUnreadNotifs();
+      $$(".bnav").forEach(b=>{
+        const key = b.getAttribute("data-nav");
+        b.classList.toggle("active", state.view === key);
+      });
+      $$(".bnav").forEach(b=>{
+        const key = b.getAttribute("data-nav");
+        if(key === "home"){
+          b.classList.toggle("hasNotif", unread > 0);
+        }
+      });
+    }
+
+    function renderUserBadge(){
+      const me = state.me;
+      const name = me ? (me.name || me.username || "You") : "Guest";
+      const meta = me ? (me.email || me.username || "") : "Not signed in";
+      $("#sideUserName").textContent = name;
+      $("#sideUserMeta").textContent = meta;
+      $("#drawerUserName").textContent = name;
+      $("#drawerUserMeta").textContent = meta;
+      const avatarHtml = me && me.photoDataUrl ? `<img alt="${escapeHtml(name)}" src="${escapeHtml(me.photoDataUrl)}" />` : `<svg viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/><path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/></svg>`;
+      $("#sideAvatar").innerHTML = avatarHtml;
+      $("#drawerAvatar").innerHTML = avatarHtml;
+      $("#topAvatar").innerHTML = avatarHtml;
+      const loggedIn = !!(localStorage.getItem("userId") && state.me);
+      $("#sideLogoutBtn").style.display = loggedIn ? "" : "none";
+      $("#drawerLogoutBtn").style.display = loggedIn ? "" : "none";
+      $("#sideUserCard").style.cursor = loggedIn ? "pointer" : "default";
+      $("#sideUserCard").onclick = loggedIn ? () => route("profile") : null;
+    }
+
+    function countUnreadNotifs(){
+      const list = Array.isArray(state.notifs) ? state.notifs : [];
+      return list.filter(n => !truthy(n.isRead)).length;
+    }
+    function truthy(v){
+      if(typeof v === "boolean") return v;
+      if(typeof v === "number") return v !== 0;
+      const s = String(v || "").toLowerCase();
+      return s === "true" || s === "1" || s === "yes";
+    }
+    function updateNotifBadges(){
+      const unread = countUnreadNotifs();
+      const badge = $("#notifBadge");
+      if(unread > 0){
+        badge.style.display = "";
+        badge.textContent = String(Math.min(99, unread));
+      }else{
+        badge.style.display = "none";
+        badge.textContent = "0";
+      }
+      renderBottomNav();
+    }
+
+    function openDrawer(){
+      if(state.ui.drawerOpen) return;
+      state.ui.drawerOpen = true;
+      const d = $("#drawer");
+      d.classList.add("open");
+      d.setAttribute("aria-hidden","false");
+      document.body.style.overflow = "hidden";
+    }
+    function closeDrawer(){
+      if(!state.ui.drawerOpen) return;
+      state.ui.drawerOpen = false;
+      const d = $("#drawer");
+      d.classList.remove("open");
+      d.setAttribute("aria-hidden","true");
+      document.body.style.overflow = "";
+    }
+    $("#hamburger").onclick = () => openDrawer();
+    $("#hamburger").onkeydown = (e)=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openDrawer(); } };
+    $("#drawerClose").onclick = () => closeDrawer();
+    $("#drawerClose").onkeydown = (e)=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); closeDrawer(); } };
+    $("#drawer").addEventListener("click",(e)=>{ if(e.target === $("#drawer")) closeDrawer(); });
+
+    function route(view){
+      if(!view) return;
+      if(view !== "friends") state.activeFriend = null;
+      if(view !== "splits") state.activeSplit = null;
+      state.view = view;
+      setPageMeta();
+      render();
+      syncViewData(view);
+    }
+
+    async function syncViewData(view){
+      if(!state.me) return;
+      if(view === "home"){
+        await ensureCoreData({ silent:true });
+      }else if(view === "txns"){
+        await loadTxnsScope("SELF", { silent:true });
+        await loadCategories({ silent:true });
+      }else if(view === "friends"){
+        await loadFriendSummary({ silent:true });
+        await loadTxnsScope("FRIEND", { silent:true });
+        await loadCategories({ silent:true });
+      }else if(view === "splits"){
+        await loadTxnsScope("SPLIT", { silent:true });
+        await loadCategories({ silent:true });
+      }else if(view === "notifs"){
+        await loadNotifications({ silent:true });
+      }else if(view === "profile"){
+        await loadMe({ silent:true });
+      }
+      render();
+    }
+
+    function setActiveFriend(friendUserId){
+      if(!friendUserId){ state.activeFriend = null; render(); return; }
+      const fs = (state.friendSummary || []).find(f => String(f.friendUserId) === String(friendUserId));
+      state.activeFriend = fs || { friendUserId, friendName:"Friend", netAmount:0, direction:"SETTLED" };
+      state.view = "friends";
+      setPageMeta();
+      render();
+    }
+
+    function setActiveSplit(txnId, contextMeta=null){
+      if(!txnId){ state.activeSplit = null; render(); return; }
+      const splits = state.cache.txnsByScope.SPLIT || [];
+      const t = splits.find(x => String(x.txnId) === String(txnId)) || (state.txns || []).find(x => String(x.txnId) === String(txnId)) || null;
+      state.activeSplit = { txnId, txn: t, context: contextMeta || null };
+      state.view = "splits";
+      setPageMeta();
+      render();
+    }
+
+    function logout(){
+      localStorage.removeItem("userId");
+      localStorage.removeItem("me");
+      state.me = null;
+      state.categories = [];
+      state.txns = [];
+      state.notifs = [];
+      state.friendSummary = [];
+      state.activeFriend = null;
+      state.activeSplit = null;
+      state.cache.txnsByScope = { SELF: [], FRIEND: [], SPLIT: [], ALL: [] };
+      state.cache.lastLoadAt = null;
+      state.view = "auth";
+      state.ui.authTab = "login";
+      toast("info","Logged out");
+      setPageMeta();
+      render();
+      updateNotifBadges();
+      renderUserBadge();
+    }
+    $("#sideLogoutBtn").onclick = () => logout();
+    $("#drawerLogoutBtn").onclick = () => { closeDrawer(); logout(); };
+
+    $("#notifBtn").onclick = () => {
+      if(!state.me){ toast("info","Please log in to view notifications"); return; }
+      route("notifs");
+    };
+    $("#refreshBtn").onclick = async () => {
+      if(!state.me){
+        toast("info","Not signed in");
+        return;
+      }
+      await fullRefresh();
+    };
+    $("#profileBtn").onclick = () => {
+      if(!state.me){ toast("info","Please log in"); return; }
+      route("profile");
+    };
+
+    function skelList(n=3){
+      return `<div class="list">${Array.from({length:n}).map(()=>`<div class="skel"><div class="skline w60"></div><div class="skline w80"></div><div class="skline w40"></div></div>`).join("")}</div>`;
+    }
+
+    function emptyState(title, body, ctaLabel, ctaAction){
+      const btn = ctaLabel ? `<button class="btn primary" id="emptyCta">${escapeHtml(ctaLabel)}</button>` : ``;
+      const html = `<div class="notice">
+        <div class="nIco">${icons.spark()}</div>
+        <div class="nTxt">
+          <div class="nT">${escapeHtml(title)}</div>
+          <div class="nB">${escapeHtml(body)}</div>
+          ${ctaLabel ? `<div style="margin-top:10px">${btn}</div>` : ``}
+        </div>
+      </div>`;
+      return { html, bind: () => { if(ctaLabel && $("#emptyCta")) $("#emptyCta").onclick = ctaAction; } };
+    }
+
+    function statePillForTxn(t){
+      const s = String(t?.state || "");
+      const map = {
+        PENDING_APPROVAL: { cls:"warn", label:"Pending approval" },
+        APPROVED_UNPAID: { cls:"info", label:"Approved • Unpaid" },
+        MARKED_PAID: { cls:"warn", label:"Marked paid" },
+        CONFIRM_RECEIVED: { cls:"good", label:"Settled" },
+        CONFIRM_NOT_RECEIVED: { cls:"bad", label:"Not received" },
+        REJECTED: { cls:"bad", label:"Rejected" },
+        CANCELLED: { cls:"neutral", label:"Cancelled" },
+        ACTIVE: { cls:"info", label:"Active" },
+        COMPLETED: { cls:"good", label:"Completed" }
+      };
+      const m = map[s] || { cls:"neutral", label: s ? s.replace(/_/g," ") : "—" };
+      const clz = m.cls === "neutral" ? "" : m.cls;
+      return `<span class="statePill ${clz}">${escapeHtml(m.label)}</span>`;
+    }
+
+    function txnTypeBadge(t){
+      const type = String(t?.type || "");
+      const scope = String(t?.scope || "");
+      let label = "Transaction";
+      let cls = "pillInfo";
+      if(scope === "SELF"){
+        label = type === "SIMPLE_IN" ? "Income" : (type === "SIMPLE_OUT" ? "Expense" : "Self");
+        cls = type === "SIMPLE_IN" ? "pillOk" : "pillBad";
+      }else if(scope === "FRIEND"){
+        if(type === "FRIEND_GAVE") { label="Friend: I paid"; cls="pillInfo"; }
+        else if(type === "FRIEND_TOOK") { label="Friend: I borrowed"; cls="pillWarn"; }
+        else if(type === "PAYBACK") { label="Payback"; cls="pillOk"; }
+        else { label="Friend"; cls="pillInfo"; }
+      }else if(scope === "SPLIT"){
+        label = "Split";
+        cls = "pillInfo";
+      }
+      return `<span class="pill2 ${cls}">${escapeHtml(label)}</span>`;
+    }
+
+    async function compressImageToDataUrl(file, maxW=900, quality=0.75){
+      if(!file) return "";
+      const typeOk = /^image\//.test(file.type || "");
+      if(!typeOk) throw new Error("Please select an image file.");
+      const dataUrl = await new Promise((resolve,reject)=>{
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result||""));
+        reader.onerror = () => reject(new Error("Could not read image file."));
+        reader.readAsDataURL(file);
+      });
+      const img = await new Promise((resolve,reject)=>{
+        const i = new Image();
+        i.onload = () => resolve(i);
+        i.onerror = () => reject(new Error("Could not load image."));
+        i.src = dataUrl;
+      });
+      const w = img.naturalWidth || img.width;
+      const h = img.naturalHeight || img.height;
+      if(!w || !h) throw new Error("Invalid image.");
+      const scale = Math.min(1, maxW / w);
+      const nw = Math.max(1, Math.round(w * scale));
+      const nh = Math.max(1, Math.round(h * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = nw;
+      canvas.height = nh;
+      const ctx = canvas.getContext("2d", { alpha:false });
+      ctx.drawImage(img, 0, 0, nw, nh);
+      const out = canvas.toDataURL("image/jpeg", quality);
+      return out;
+    }
+
+    async function loadMe({ silent=false } = {}){
+      try{
+        if(!silent) setOverlay(true, "Loading", "Fetching your profile…");
+        const userId = localStorage.getItem("userId") || "";
+        if(!userId) throw new Error("No session");
+        const me = await api("getMe", { userId });
+        state.me = me || null;
+        localStorage.setItem("me", JSON.stringify(me || {}));
+      }finally{
+        if(!silent) setOverlay(false);
+      }
+    }
+
+    async function loadCategories({ silent=false } = {}){
+      if(!state.me) return;
+      state.loading.categories = true;
+      if(!silent) render();
+      try{
+        const data = await api("listCategories", {});
+        state.categories = Array.isArray(data) ? data : [];
+      }catch(e){
+        toast("error","Couldn’t load categories", e.message || "Please retry.");
+      }finally{
+        state.loading.categories = false;
+        if(!silent) render();
+      }
+    }
+
+    async function loadNotifications({ silent=false } = {}){
+      if(!state.me) return;
+      state.loading.notifs = true;
+      if(!silent) render();
+      try{
+        const data = await api("listNotifications", {});
+        state.notifs = Array.isArray(data) ? data : [];
+        updateNotifBadges();
+      }catch(e){
+        toast("error","Couldn’t load notifications", e.message || "Please retry.");
+      }finally{
+        state.loading.notifs = false;
+        if(!silent) render();
+      }
+    }
+
+    async function loadFriendSummary({ silent=false } = {}){
+      if(!state.me) return;
+      state.loading.friends = true;
+      if(!silent) render();
+      try{
+        const data = await api("friendTabSummary", {});
+        state.friendSummary = Array.isArray(data) ? data : [];
+      }catch(e){
+        toast("error","Couldn’t load friends", e.message || "Please retry.");
+      }finally{
+        state.loading.friends = false;
+        if(!silent) render();
+      }
+    }
+
+    async function loadTxnsAll({ silent=false } = {}){
+      if(!state.me) return;
+      state.loading.txns = true;
+      if(!silent) render();
+      try{
+        const data = await api("listTxns", {});
+        const list = Array.isArray(data) ? data : [];
+        state.txns = list;
+        state.cache.txnsByScope.ALL = list;
+        state.cache.txnsByScope.SELF = list.filter(t => String(t.scope) === "SELF");
+        state.cache.txnsByScope.FRIEND = list.filter(t => String(t.scope) === "FRIEND");
+        state.cache.txnsByScope.SPLIT = list.filter(t => String(t.scope) === "SPLIT");
+      }catch(e){
+        toast("error","Couldn’t load transactions", e.message || "Please retry.");
+      }finally{
+        state.loading.txns = false;
+        if(!silent) render();
+      }
+    }
+
+    async function loadTxnsScope(scope, { silent=false } = {}){
+      if(!state.me) return;
+      const sc = String(scope || "");
+      state.loading.txns = true;
+      if(!silent) render();
+      try{
+        const data = await api("listTxns", sc ? { scope: sc } : {});
+        const list = Array.isArray(data) ? data : [];
+        state.cache.txnsByScope[sc || "ALL"] = list;
+        if(!sc){
+          state.txns = list;
+          state.cache.txnsByScope.SELF = list.filter(t => String(t.scope) === "SELF");
+          state.cache.txnsByScope.FRIEND = list.filter(t => String(t.scope) === "FRIEND");
+          state.cache.txnsByScope.SPLIT = list.filter(t => String(t.scope) === "SPLIT");
+        }
+      }catch(e){
+        toast("error","Couldn’t load transactions", e.message || "Please retry.");
+      }finally{
+        state.loading.txns = false;
+        if(!silent) render();
+      }
+    }
+
+    async function ensureCoreData({ silent=false } = {}){
+      if(!state.me) return;
+      const tasks = [
+        loadMe({ silent:true }),
+        loadCategories({ silent:true }),
+        loadNotifications({ silent:true }),
+        loadFriendSummary({ silent:true }),
+        loadTxnsAll({ silent:true })
+      ];
+      if(!silent) setOverlay(true, "Refreshing", "Syncing your dashboard…");
+      try{
+        await Promise.allSettled(tasks);
+        state.cache.lastLoadAt = new Date().toISOString();
+        renderUserBadge();
+        updateNotifBadges();
+      }finally{
+        if(!silent) setOverlay(false);
+      }
+    }
+
+    async function fullRefresh(){
+      state.loading.refresh = true;
+      $("#refreshBtn").disabled = true;
+      setOverlay(true, "Refreshing", "Fetching latest updates…");
+      try{
+        await ensureCoreData({ silent:true });
+        toast("success","Updated","All data is up to date.");
+      }catch(e){
+        toast("error","Refresh failed", e.message || "Please retry.");
+      }finally{
+        state.loading.refresh = false;
+        $("#refreshBtn").disabled = false;
+        setOverlay(false);
+        render();
+      }
+    }
+
+    function groupCategories(){
+      const cats = Array.isArray(state.categories) ? state.categories : [];
+      const map = {};
+      cats.forEach(c=>{
+        const p = String(c.parentCategory || "Other");
+        if(!map[p]) map[p] = [];
+        map[p].push(c);
+      });
+      Object.keys(map).forEach(k=>{
+        map[k].sort((a,b)=>String(a.label||"").localeCompare(String(b.label||"")));
+      });
+      return map;
+    }
+
+    function categoryOptionsHtml(selected=""){
+      const groups = groupCategories();
+      const keys = Object.keys(groups).sort((a,b)=>a.localeCompare(b));
+      if(keys.length === 0){
+        return `<option value="">No categories</option>`;
+      }
+      return `<option value="">Select category</option>` + keys.map(k=>{
+        const opts = groups[k].map(c=>{
+          const v = String(c.label || "");
+          const sel = v === String(selected || "") ? "selected" : "";
+          return `<option value="${escapeHtml(v)}" ${sel}>${escapeHtml(v)}</option>`;
+        }).join("");
+        return `<optgroup label="${escapeHtml(k)}">${opts}</optgroup>`;
+      }).join("");
+    }
+
+    function knownFriends(){
+      const fs = Array.isArray(state.friendSummary) ? state.friendSummary : [];
+      return fs.map(f => ({ id: String(f.friendUserId||""), name: String(f.friendName||"Friend"), netAmount: Number(f.netAmount||0), direction: String(f.direction||"SETTLED") }))
+               .filter(x => x.id);
+    }
+
+    function recentActivity(limit=10){
+      const list = Array.isArray(state.cache.txnsByScope.ALL) ? state.cache.txnsByScope.ALL : (Array.isArray(state.txns)?state.txns:[]);
+      return list.slice(0, limit);
+    }
+
+    function render(){
+      setPageMeta();
+      renderNav($("#sideNav"));
+      renderNav($("#drawerNav"));
+      renderBottomNav();
+      renderUserBadge();
+      setOnlinePill();
+      updateNotifBadges();
+
+      if(state.view === "auth") renderAuth();
+      else if(state.view === "home") renderHome();
+      else if(state.view === "txns") renderTxns();
+      else if(state.view === "friends") renderFriends();
+      else if(state.view === "splits") renderSplits();
+      else if(state.view === "notifs") renderNotifs();
+      else if(state.view === "profile") renderProfile();
+      else renderHome();
+
+      $$("[data-nav]", $("#bottomNav")).forEach(btn=>{
+        btn.onclick = ()=>route(btn.getAttribute("data-nav"));
+        btn.onkeydown = (e)=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); btn.onclick(); } };
+      });
+    }
+
+    function renderAuth(){
+      const tab = state.ui.authTab;
+      const html = `
+        <div class="authwrap">
+          <div class="authcard">
+            <div class="authhead">
+              <div class="a1">Sign in to FinSplit</div>
+              <div class="a2">Track balances, approvals, friend ledgers, and split bills — with clean, reliable flows.</div>
+            </div>
+            <div class="authbody">
+              <div class="tabs" role="tablist" aria-label="Auth tabs">
+                <button class="tab ${tab==="login"?"active":""}" id="tabLogin" role="tab" aria-selected="${tab==="login"}">Login</button>
+                <button class="tab ${tab==="register"?"active":""}" id="tabRegister" role="tab" aria-selected="${tab==="register"}">Register</button>
+              </div>
+              <div style="height:12px"></div>
+              ${tab==="login" ? renderLoginForm() : renderRegisterForm()}
+              <div class="divider"></div>
+              <div class="notice">
+                <div class="nIco">${icons.shield()}</div>
+                <div class="nTxt">
+                  <div class="nT">Setup & diagnostics</div>
+                  <div class="nB">If you just deployed your backend, initialize the sheet schema once.</div>
+                  <div style="margin-top:10px" class="inline">
+                    <button class="btn" id="setupBtn">${icons.spark()}<span>Run Setup</span></button>
+                    <span class="pill2 pillInfo">Backend: <span class="mono" style="opacity:.85">${escapeHtml(BACKEND_URL)}</span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="footerline">Built for speed, clarity, and safe fallbacks.</div>
+          </div>
+        </div>
+      `;
+      appEl.innerHTML = html;
+
+      $("#tabLogin").onclick = ()=>{ state.ui.authTab="login"; render(); };
+      $("#tabRegister").onclick = ()=>{ state.ui.authTab="register"; render(); };
+
+      $("#setupBtn").onclick = async ()=>{
+        try{
+          setBtnLoading("setup", true);
+          $("#setupBtn").setAttribute("data-bkey","setup");
+          $("#setupBtn").setAttribute("data-label","Run Setup");
+          setOverlay(true,"Setting up","Initializing backend sheets…");
+          await api("setup", {}, { timeoutMs: 25000 });
+          toast("success","Setup complete","Your backend sheets are initialized.");
+        }catch(e){
+          toast("error","Setup failed", e.message || "Please verify your deployment and retry.");
+        }finally{
+          setOverlay(false);
+          setBtnLoading("setup", false);
+          $("#setupBtn").textContent = "Run Setup";
+          $("#setupBtn").innerHTML = `${icons.spark()}<span>Run Setup</span>`;
+        }
+      };
+
+      bindAuthForm();
+      $("#bottomNav").style.display = "none";
+    }
+
+    function renderLoginForm(){
+      return `
+        <div class="card" style="background:rgba(15,26,48,.55)">
+          <div class="card-h">
+            <div class="card-title">
+              <div class="t1">Login</div>
+              <div class="t2">Use your username or email and password.</div>
+            </div>
+            <span class="pill2 pillInfo">Fast sign-in</span>
+          </div>
+          <div class="card-b">
+            <form class="form" id="loginForm">
+              <div class="frow">
+                <div class="label"><span>Username or Email</span><span class="small muted">Required</span></div>
+                <input type="text" id="loginUser" autocomplete="username" placeholder="e.g. arjun or arjun@email.com" />
+                <div class="err" id="loginUserErr" style="display:none"></div>
+              </div>
+              <div class="frow">
+                <div class="label"><span>Password</span><span class="small muted">Required</span></div>
+                <input type="password" id="loginPass" autocomplete="current-password" placeholder="Your password" />
+                <div class="err" id="loginPassErr" style="display:none"></div>
+              </div>
+              <div class="inline" style="justify-content:space-between; margin-top:4px">
+                <span class="small muted">Session is stored locally on this device.</span>
+              </div>
+              <button class="btn primary btnblock" id="loginBtn" type="submit">Login</button>
+              <div id="loginGlobalErr" class="err" style="display:none"></div>
+            </form>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderRegisterForm(){
+      return `
+        <div class="card" style="background:rgba(15,26,48,.55)">
+          <div class="card-h">
+            <div class="card-title">
+              <div class="t1">Create account</div>
+              <div class="t2">Pick a unique username and secure password.</div>
+            </div>
+            <span class="pill2 pillOk">New user</span>
+          </div>
+          <div class="card-b">
+            <form class="form" id="registerForm">
+              <div class="fgrid">
+                <div class="frow">
+                  <div class="label"><span>Username</span><span class="small muted">Required</span></div>
+                  <input type="text" id="regUser" autocomplete="username" placeholder="e.g. arjun" />
+                  <div class="err" id="regUserErr" style="display:none"></div>
+                </div>
+                <div class="frow">
+                  <div class="label"><span>Email</span><span class="small muted">Required</span></div>
+                  <input type="email" id="regEmail" autocomplete="email" placeholder="e.g. arjun@email.com" />
+                  <div class="err" id="regEmailErr" style="display:none"></div>
+                </div>
+              </div>
+              <div class="frow">
+                <div class="label"><span>Password</span><span class="small muted">Min 8 chars</span></div>
+                <input type="password" id="regPass" autocomplete="new-password" placeholder="At least 8 characters" />
+                <div class="err" id="regPassErr" style="display:none"></div>
+              </div>
+              <button class="btn primary btnblock" id="regBtn" type="submit">Create account</button>
+              <div id="regGlobalErr" class="err" style="display:none"></div>
+            </form>
+          </div>
+        </div>
+      `;
+    }
+
+    function clearErr(ids){
+      ids.forEach(id=>{
+        const el = $("#"+id);
+        if(el){ el.style.display="none"; el.textContent=""; }
+      });
+    }
+    function showErr(id, msg){
+      const el = $("#"+id);
+      if(el){ el.style.display=""; el.textContent = msg; }
+    }
+
+    function bindAuthForm(){
+      const loginForm = $("#loginForm");
+      if(loginForm){
+        loginForm.onsubmit = async (e)=>{
+          e.preventDefault();
+          clearErr(["loginUserErr","loginPassErr","loginGlobalErr"]);
+          const usernameOrEmail = String($("#loginUser").value || "").trim();
+          const password = String($("#loginPass").value || "");
+          let ok = true;
+          if(!usernameOrEmail){ showErr("loginUserErr","Please enter your username or email."); ok=false; }
+          if(!password){ showErr("loginPassErr","Please enter your password."); ok=false; }
+          if(!ok) return;
+          const btn = $("#loginBtn");
+          btn.disabled = true;
+          btn.innerHTML = `<div class="spin" style="width:18px;height:18px;border-width:2px"></div><span>Signing in</span>`;
+          try{
+            const me = await api("login", { usernameOrEmail, password });
+            const userId = String(me && me.userId ? me.userId : "");
+            if(!userId) throw new Error("Login succeeded, but userId is missing.");
+            localStorage.setItem("userId", userId);
+            localStorage.setItem("me", JSON.stringify(me || {}));
+            state.me = me || null;
+            toast("success","Welcome back", "Signed in successfully.");
+            $("#bottomNav").style.display = "";
+            await ensureCoreData({ silent:false });
+            state.view = "home";
+            setPageMeta();
+            render();
+          }catch(err){
+            showErr("loginGlobalErr", err.message || "Login failed.");
+            toast("error","Login failed", err.message || "Please check details and try again.");
+          }finally{
+            btn.disabled = false;
+            btn.textContent = "Login";
+          }
+        };
+      }
+
+      const regForm = $("#registerForm");
+      if(regForm){
+        regForm.onsubmit = async (e)=>{
+          e.preventDefault();
+          clearErr(["regUserErr","regEmailErr","regPassErr","regGlobalErr"]);
+          const username = String($("#regUser").value || "").trim();
+          const email = String($("#regEmail").value || "").trim();
+          const password = String($("#regPass").value || "");
+          let ok = true;
+          if(!username){ showErr("regUserErr","Please choose a username."); ok=false; }
+          if(!email){ showErr("regEmailErr","Please enter your email."); ok=false; }
+          else if(!isEmail(email)){ showErr("regEmailErr","Please enter a valid email address."); ok=false; }
+          if(!password){ showErr("regPassErr","Please choose a password."); ok=false; }
+          else if(password.length < 8){ showErr("regPassErr","Password must be at least 8 characters."); ok=false; }
+          if(!ok) return;
+          const btn = $("#regBtn");
+          btn.disabled = true;
+          btn.innerHTML = `<div class="spin" style="width:18px;height:18px;border-width:2px"></div><span>Creating</span>`;
+          try{
+            const reg = await api("register", { username, email, password });
+            const userId = String(reg && reg.userId ? reg.userId : "");
+            if(!userId) throw new Error("Account created, but userId is missing.");
+            const me = await api("login", { usernameOrEmail: username, password });
+            localStorage.setItem("userId", String(me.userId || userId));
+            localStorage.setItem("me", JSON.stringify(me || {}));
+            state.me = me || null;
+            toast("success","Account created", "You’re signed in.");
+            $("#bottomNav").style.display = "";
+            await ensureCoreData({ silent:false });
+            state.view = "home";
+            setPageMeta();
+            render();
+          }catch(err){
+            showErr("regGlobalErr", err.message || "Registration failed.");
+            toast("error","Registration failed", err.message || "Please try again.");
+          }finally{
+            btn.disabled = false;
+            btn.textContent = "Create account";
+          }
+        };
+      }
+    }
+
+    function renderHome(){
+      $("#bottomNav").style.display = "";
+      const me = state.me || {};
+      const online = Number(me.online_balance || 0);
+      const cash = Number(me.cash_balance || 0);
+      const pending = Number(me.pending_balance || 0);
+      const budget = Number(me.monthly_budget || 0);
+      const spend = Number(me.month_spend || 0);
+      const pct = budget > 0 ? clamp((spend / budget) * 100, 0, 100) : 0;
+      const pctLabel = budget > 0 ? `${Math.round((spend / budget) * 100)}%` : "Set budget";
+      const friends = Array.isArray(state.friendSummary) ? state.friendSummary : [];
+      const txs = recentActivity(10);
+
+      const balances = `
+        <div class="kpis">
+          <div class="kpi">
+            <div class="kpi-top">
+              <div class="kpi-label">Online balance</div>
+              <span class="chip"><span class="dot good"></span><span>Available</span></span>
+            </div>
+            <div class="kpi-amt ${online>=0 ? "positive":""}">${formatINR(online)}</div>
+            <div class="kpi-sub"><span class="dot good"></span><span>Use for online payments</span></div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-top">
+              <div class="kpi-label">Cash balance</div>
+              <span class="chip"><span class="dot warn"></span><span>On hand</span></span>
+            </div>
+            <div class="kpi-amt">${formatINR(cash)}</div>
+            <div class="kpi-sub"><span class="dot warn"></span><span>Use for cash spending</span></div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-top">
+              <div class="kpi-label">Pending balance</div>
+              <span class="chip"><span class="dot bad"></span><span>Locked</span></span>
+            </div>
+            <div class="kpi-amt">${formatINR(pending)}</div>
+            <div class="kpi-sub"><span class="dot bad"></span><span>Held for friend/split flows</span></div>
+          </div>
+        </div>
+      `;
+
+      const budgetCard = `
+        <div class="card">
+          <div class="card-h">
+            <div class="card-title">
+              <div class="t1">Monthly budget</div>
+              <div class="t2">Keep spending on track. Visual cap at 100% for clarity.</div>
+            </div>
+            <span class="chip ${budget>0 ? "neutral" : "pillWarn"}"><strong>${escapeHtml(pctLabel)}</strong></span>
+          </div>
+          <div class="card-b">
+            <div class="row sp">
+              <div class="small muted">Budget</div>
+              <div class="small" style="font-weight:950">${formatINR(budget)}</div>
+            </div>
+            <div class="row sp" style="margin-top:6px">
+              <div class="small muted">This month spent</div>
+              <div class="small" style="font-weight:950">${formatINR(spend)}</div>
+            </div>
+            <div style="height:10px"></div>
+            <div class="progress" aria-label="Budget progress"><div style="width:${pct}%"></div></div>
+            <div class="inline" style="justify-content:space-between; margin-top:10px">
+              <span class="small muted">Tip: update anytime.</span>
+              <button class="btn small primary" id="editBudgetBtn">Update budget</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const friendList = state.loading.friends ? skelList(3) : (
+        friends.length ? `<div class="list">
+          ${friends.map(f=>{
+            const net = Number(f.netAmount || 0);
+            const dir = String(f.direction || "SETTLED");
+            const cls = dir === "FRIEND_OWES_ME" ? "good" : (dir === "I_OWE_FRIEND" ? "bad" : "neutral");
+            const amtCls = dir === "FRIEND_OWES_ME" ? "good" : (dir === "I_OWE_FRIEND" ? "bad" : "neutral");
+            const label = dir === "FRIEND_OWES_ME" ? "Owes you" : (dir === "I_OWE_FRIEND" ? "You owe" : "Settled");
+            const abs = Math.abs(net);
+            return `<div class="item" data-friend="${escapeHtml(f.friendUserId)}">
+              <div class="item-left">
+                <div class="avatar" style="width:40px;height:40px;border-radius:16px"><svg viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/><path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/></svg></div>
+                <div class="item-main">
+                  <div class="item-title">${escapeHtml(f.friendName || "Friend")}</div>
+                  <div class="item-sub">${escapeHtml(label)} • ${escapeHtml(f.friendUserId || "")}</div>
+                </div>
+              </div>
+              <div class="item-right">
+                <div class="amt ${amtCls}">${formatINR(abs)}</div>
+                <span class="chip ${cls}">${escapeHtml(dir.replace(/_/g," "))}</span>
+              </div>
+            </div>`;
+          }).join("")}
+        </div>` : emptyState("No friends yet","Add a friend to start tracking shared expenses and settlements.","Send friend request", ()=>route("friends")).html
+      );
+
+      const activityList = state.loading.txns ? skelList(4) : (
+        txs.length ? `<div class="list">
+          ${txs.map(t=>{
+            const scope = String(t.scope || "");
+            const type = String(t.type || "");
+            const amount = Number(t.amountTotal || 0);
+            const sign = (scope === "SELF" && type === "SIMPLE_IN") ? "+" : (scope === "SELF" && type === "SIMPLE_OUT" ? "−" : "");
+            const amtCls = (scope==="SELF" && type==="SIMPLE_IN") ? "good" : (scope==="SELF" && type==="SIMPLE_OUT") ? "bad" : "neutral";
+            const title = scope === "SELF" ? (type==="SIMPLE_IN" ? "Income" : "Expense") : (scope === "FRIEND" ? "Friend" : (scope==="SPLIT" ? "Split" : "Transaction"));
+            const sub = `${t.category ? String(t.category) : "—"} • ${t.mode ? String(t.mode) : "—"} • ${formatDateOnly(t.txnDateTime || t.createdAt)}`;
+            return `<div class="item" data-open-txn="${escapeHtml(t.txnId)}">
+              <div class="item-left">
+                <div class="avatar" style="width:40px;height:40px;border-radius:16px;background:linear-gradient(135deg, rgba(124,92,255,.18), rgba(34,199,255,.10))">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M7 7h14M7 12h14M7 17h14M3 7h.01M3 12h.01M3 17h.01" stroke="rgba(255,255,255,.9)" stroke-width="2" stroke-linecap="round"/></svg>
+                </div>
+                <div class="item-main">
+                  <div class="item-title">${escapeHtml(title)} • ${escapeHtml(t.scope || "")}</div>
+                  <div class="item-sub">${escapeHtml(sub)}</div>
+                </div>
+              </div>
+              <div class="item-right">
+                <div class="amt ${amtCls}">${escapeHtml(sign)}${formatINR(amount)}</div>
+                ${txnTypeBadge(t)}
+              </div>
+            </div>`;
+          }).join("")}
+        </div>` : emptyState("No activity yet","Create a transaction or add a friend to see activity here.","Create transaction", ()=>route("txns")).html
+      );
+
+      appEl.innerHTML = `
+        <div class="grid">
+          <div>
+            ${balances}
+            <div style="height:12px"></div>
+            <div class="card">
+              <div class="card-h">
+                <div class="card-title">
+                  <div class="t1">Friend summary</div>
+                  <div class="t2">Net position across friend ledgers. Tap to open a ledger.</div>
+                </div>
+                <button class="btn small" id="goFriendsBtn">Manage</button>
+              </div>
+              <div class="card-b">${friendList}</div>
+            </div>
+            <div style="height:12px"></div>
+            <div class="card">
+              <div class="card-h">
+                <div class="card-title">
+                  <div class="t1">Recent activity</div>
+                  <div class="t2">Latest 10 across self, friends, and splits.</div>
+                </div>
+                <button class="btn small" id="goTxnsBtn">View</button>
+              </div>
+              <div class="card-b">${activityList}</div>
+            </div>
+          </div>
+          <div>
+            ${budgetCard}
+            <div style="height:12px"></div>
+            <div class="rightNote">
+              <div class="rt">Quick actions</div>
+              <div class="rb">Use these shortcuts to keep flows moving. All actions sync balances, lists, and notifications.</div>
+              <div class="hr"></div>
+              <div class="inline" style="gap:10px">
+                <button class="btn primary" id="qaCreateTxn">${icons.spark()}<span>Create self txn</span></button>
+                <button class="btn" id="qaCreateSplit">Create split</button>
+                <button class="btn" id="qaNotifs">Open notifications</button>
+              </div>
+              <div class="hr"></div>
+              <div class="small muted">Last refreshed: <span id="lastLoad">${escapeHtml(state.cache.lastLoadAt ? formatDateTime(state.cache.lastLoadAt) : "—")}</span></div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      $("#goFriendsBtn").onclick = ()=>route("friends");
+      $("#goTxnsBtn").onclick = ()=>route("txns");
+      $("#qaCreateTxn").onclick = ()=>{ route("txns"); setTimeout(()=>{ const b=$("#newTxnBtn"); if(b) b.click(); }, 40); };
+      $("#qaCreateSplit").onclick = ()=>{ route("splits"); setTimeout(()=>{ const b=$("#newSplitBtn"); if(b) b.click(); }, 40); };
+      $("#qaNotifs").onclick = ()=>route("notifs");
+
+      $$("[data-friend]").forEach(el=>{
+        el.onclick = ()=> setActiveFriend(el.getAttribute("data-friend"));
+      });
+
+      $$("[data-open-txn]").forEach(el=>{
+        el.onclick = ()=>{
+          const txnId = el.getAttribute("data-open-txn");
+          const t = (state.cache.txnsByScope.ALL||[]).find(x=>String(x.txnId)===String(txnId));
+          if(!t){ toast("info","Transaction not available"); return; }
+          if(String(t.scope)==="FRIEND"){
+            const other = deriveFriendCounterpartyId(t);
+            if(other) setActiveFriend(other);
+            else route("friends");
+          }else if(String(t.scope)==="SPLIT"){
+            setActiveSplit(t.txnId);
+          }else{
+            route("txns");
+          }
+        };
+      });
+
+      $("#editBudgetBtn").onclick = ()=> openBudgetModal();
+    }
+
+    function openBudgetModal(){
+      const me = state.me || {};
+      const current = Number(me.monthly_budget || 0);
+      const body = `
+        <div class="form">
+          <div class="frow">
+            <div class="label"><span>Monthly budget (₹)</span><span class="small muted">Update anytime</span></div>
+            <input type="number" id="budgetVal" min="0" step="0.01" value="${escapeHtml(current)}" placeholder="e.g. 25000" />
+            <div class="err" id="budgetErr" style="display:none"></div>
+          </div>
+          <div class="hint">This updates <span class="mono">monthly_budget</span> in your profile. Spending progress uses <span class="mono">month_spend</span> from your account.</div>
+        </div>
+      `;
+      const footer = `
+        <button class="btn" id="budgetCancel">Cancel</button>
+        <button class="btn primary" id="budgetSave">Save</button>
+      `;
+      openModal({ title:"Update budget", subtitle:"Set your monthly spending target.", bodyHtml: body, footerHtml: footer, critical:false });
+      $("#budgetCancel").onclick = ()=>closeModal("cancel");
+      $("#budgetSave").onclick = async ()=>{
+        $("#budgetErr").style.display="none";
+        const v = Number($("#budgetVal").value);
+        if(!isFinite(v) || v < 0){
+          $("#budgetErr").style.display="";
+          $("#budgetErr").textContent="Please enter a valid non-negative amount.";
+          return;
+        }
+        const key="updBudget";
+        $("#budgetSave").setAttribute("data-bkey", key);
+        $("#budgetSave").setAttribute("data-label", "Save");
+        setBtnLoading(key,true);
+        try{
+          await api("updateProfile", { monthly_budget: v });
+          toast("success","Budget updated");
+          closeModal("ok");
+          await loadMe({ silent:true });
+          render();
+        }catch(e){
+          toast("error","Couldn’t update budget", e.message || "Please retry.");
+        }finally{
+          setBtnLoading(key,false);
+          const b=$("#budgetSave"); if(b){ b.disabled=false; b.textContent="Save"; }
+        }
+      };
+    }
+
+    function deriveFriendCounterpartyId(txn){
+      const meId = String(state.me?.userId || "");
+      const payer = String(txn?.payerUserId || "");
+      const receiver = String(txn?.receiverUserId || "");
+      if(!meId || !payer || !receiver) return "";
+      if(meId === payer) return receiver;
+      if(meId === receiver) return payer;
+      return "";
+    }
+
+    function renderTxns(){
+      $("#bottomNav").style.display = "";
+      const catsReady = !state.loading.categories;
+      const txns = Array.isArray(state.cache.txnsByScope.SELF) ? state.cache.txnsByScope.SELF : [];
+      const filters = state.ui.txnFilters || { direction:"ALL", mode:"ALL", category:"ALL", from:"", to:"" };
+
+      const filtered = txns.filter(t=>{
+        const type = String(t.type || "");
+        const dir = type === "SIMPLE_IN" ? "IN" : (type === "SIMPLE_OUT" ? "OUT" : "ALL");
+        if(filters.direction !== "ALL" && dir !== filters.direction) return false;
+        const mode = String(t.mode || "");
+        if(filters.mode !== "ALL" && mode !== filters.mode) return false;
+        const cat = String(t.category || "");
+        if(filters.category !== "ALL" && cat !== filters.category) return false;
+        const dt = new Date(t.txnDateTime || t.createdAt || "");
+        const tms = isNaN(dt.getTime()) ? null : dt.getTime();
+        if(filters.from){
+          const from = new Date(filters.from + "T00:00:00");
+          if(!isNaN(from.getTime()) && tms !== null && tms < from.getTime()) return false;
+        }
+        if(filters.to){
+          const to = new Date(filters.to + "T23:59:59");
+          if(!isNaN(to.getTime()) && tms !== null && tms > to.getTime()) return false;
+        }
+        return true;
+      });
+
+      const filtersHtml = `
+        <div class="card">
+          <div class="card-h">
+            <div class="card-title">
+              <div class="t1">Filters</div>
+              <div class="t2">Client-side filters for direction, mode, category, and date range.</div>
+            </div>
+            <button class="btn small" id="clearFiltersBtn">Clear</button>
+          </div>
+          <div class="card-b">
+            <div class="fgrid">
+              <div class="frow">
+                <div class="label"><span>Direction</span><span class="small muted">IN/OUT</span></div>
+                <select id="fDir">
+                  <option value="ALL" ${filters.direction==="ALL"?"selected":""}>All</option>
+                  <option value="IN" ${filters.direction==="IN"?"selected":""}>IN (Income)</option>
+                  <option value="OUT" ${filters.direction==="OUT"?"selected":""}>OUT (Expense)</option>
+                </select>
+              </div>
+              <div class="frow">
+                <div class="label"><span>Mode</span><span class="small muted">ONLINE/CASH</span></div>
+                <select id="fMode">
+                  <option value="ALL" ${filters.mode==="ALL"?"selected":""}>All</option>
+                  <option value="ONLINE" ${filters.mode==="ONLINE"?"selected":""}>ONLINE</option>
+                  <option value="CASH" ${filters.mode==="CASH"?"selected":""}>CASH</option>
+                </select>
+              </div>
+              <div class="frow">
+                <div class="label"><span>Category</span><span class="small muted">Optional</span></div>
+                <select id="fCat" ${catsReady ? "" : "disabled"}>
+                  <option value="ALL" ${filters.category==="ALL"?"selected":""}>All</option>
+                  ${(Array.isArray(state.categories) && state.categories.length) ? state.categories.map(c=>`<option value="${escapeHtml(String(c.label||""))}" ${filters.category===String(c.label||"")?"selected":""}>${escapeHtml(String(c.label||""))}</option>`).join("") : ``}
+                </select>
+              </div>
+              <div class="frow">
+                <div class="label"><span>Date range</span><span class="small muted">From / To</span></div>
+                <div class="inline" style="gap:10px">
+                  <input type="date" id="fFrom" value="${escapeHtml(filters.from||"")}" />
+                  <input type="date" id="fTo" value="${escapeHtml(filters.to||"")}" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const listHtml = state.loading.txns ? skelList(4) : (
+        filtered.length ? `<div class="list">
+          ${filtered.map(t=>{
+            const amount = Number(t.amountTotal || 0);
+            const type = String(t.type || "");
+            const dir = type === "SIMPLE_IN" ? "IN" : "OUT";
+            const sign = dir === "IN" ? "+" : "−";
+            const amtCls = dir === "IN" ? "good" : "bad";
+            const sub = `${t.category ? String(t.category) : "—"} • ${t.mode ? String(t.mode) : "—"} • ${formatDateOnly(t.txnDateTime || t.createdAt)}`;
+            const notes = String(t.notes || "").trim();
+            return `<div class="item" data-self-edit="${escapeHtml(t.txnId)}">
+              <div class="item-left">
+                <div class="avatar" style="width:40px;height:40px;border-radius:16px;background:linear-gradient(135deg, rgba(255,92,122,.12), rgba(124,92,255,.14))">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M12 1v22" stroke="rgba(255,255,255,.78)" stroke-width="2" stroke-linecap="round"/><path d="M7 6h10M7 18h10" stroke="rgba(255,255,255,.78)" stroke-width="2" stroke-linecap="round"/></svg>
+                </div>
+                <div class="item-main">
+                  <div class="item-title">${escapeHtml(dir==="IN"?"Income":"Expense")}</div>
+                  <div class="item-sub">${escapeHtml(sub)}</div>
+                  ${notes ? `<div class="small muted" style="margin-top:2px; line-height:1.35; white-space:normal">${escapeHtml(notes)}</div>` : ``}
+                </div>
+              </div>
+              <div class="item-right">
+                <div class="amt ${amtCls}">${escapeHtml(sign)}${formatINR(amount)}</div>
+                <span class="chip">${escapeHtml(t.mode || "—")}</span>
+              </div>
+            </div>`;
+          }).join("")}
+        </div>` : emptyState("Create your first transaction","Track income and spending. Add a category if you don’t have one yet.","Create transaction", ()=>openCreateTxnModal()).html
+      );
+
+      appEl.innerHTML = `
+        <div class="grid">
+          <div>
+            <div class="card">
+              <div class="card-h">
+                <div class="card-title">
+                  <div class="t1">Self transactions</div>
+                  <div class="t2">Create, filter, and edit your personal transactions. No tables on mobile — cards only.</div>
+                </div>
+                <div class="inline">
+                  <button class="btn primary small" id="newTxnBtn">New</button>
+                  <button class="btn small" id="manageCatsBtn">Categories</button>
+                </div>
+              </div>
+              <div class="card-b">${listHtml}</div>
+            </div>
+          </div>
+          <div>
+            ${filtersHtml}
+            <div style="height:12px"></div>
+            <div class="rightNote">
+              <div class="rt">Category tips</div>
+              <div class="rb">Create a category once and it will show up across self, friends, and splits. Categories are stored per user.</div>
+              <div class="hr"></div>
+              <div class="inline">
+                <button class="btn" id="addCatQuickBtn">Add category</button>
+                <button class="btn" id="reloadCatsBtn">Reload</button>
+              </div>
+              <div class="hr"></div>
+              <div class="small muted">Loaded categories: <span style="font-weight:900">${escapeHtml(String((state.categories||[]).length || 0))}</span></div>
+            </div>
+          </div>
+        </div>
+      `;
+
+          const applyFilters = ()=>{
+        state.ui.txnFilters.direction = $("#fDir").value;
+        state.ui.txnFilters.mode = $("#fMode").value;
+        state.ui.txnFilters.category = $("#fCat").value;
+        state.ui.txnFilters.from = $("#fFrom").value;
+        state.ui.txnFilters.to = $("#fTo").value;
+        render();
+      };
+
+/* ===========================
+   PATCH 1: FIX api() HEADER
+   =========================== */
+// Find your api() function and change ONLY headers to text/plain:
+// headers:{ "Content-Type":"text/plain;charset=utf-8" },
+
+/* ===========================
+   CONTINUE FROM: const applyFilters = ()=>{...}
+   =========================== */
+
+      $("#fDir").onchange = applyFilters;
+      $("#fMode").onchange = applyFilters;
+      $("#fCat").onchange = applyFilters;
+      $("#fFrom").onchange = applyFilters;
+      $("#fTo").onchange = applyFilters;
+
+      $("#clearFiltersBtn").onclick = ()=>{
+        state.ui.txnFilters = { direction:"ALL", mode:"ALL", category:"ALL", from:"", to:"" };
+        render();
+      };
+
+      $("#newTxnBtn").onclick = ()=> openCreateTxnModal();
+      $("#manageCatsBtn").onclick = ()=> openCategoryManagerModal();
+      $("#addCatQuickBtn").onclick = ()=> openAddCategoryModal();
+      $("#reloadCatsBtn").onclick = async ()=>{ await loadCategories({ silent:false }); };
+
+      $$("[data-self-edit]").forEach(el=>{
+        el.onclick = ()=> openEditSelfTxnModal(el.getAttribute("data-self-edit"));
+      });
+    }
+
+    function openCreateTxnModal(){
+      const catsReady = Array.isArray(state.categories) && state.categories.length;
+      const body = `
+        <div class="form">
+          <div class="seg" role="tablist" aria-label="Transaction type">
+            <button id="txnTypeOut" class="active" type="button">Expense</button>
+            <button id="txnTypeIn" type="button">Income</button>
+          </div>
+
+          <div class="frow">
+            <div class="label"><span>Amount (₹)</span><span class="small muted">Required</span></div>
+            <input type="number" id="txnAmt" min="0" step="0.01" placeholder="e.g. 499" />
+            <div class="err" id="txnAmtErr" style="display:none"></div>
+          </div>
+
+          <div class="fgrid">
+            <div class="frow">
+              <div class="label"><span>Mode</span><span class="small muted">ONLINE/CASH</span></div>
+              <select id="txnMode">
+                <option value="ONLINE">ONLINE</option>
+                <option value="CASH">CASH</option>
+              </select>
+            </div>
+            <div class="frow">
+              <div class="label"><span>Date & time</span><span class="small muted">Optional</span></div>
+              <input type="datetime-local" id="txnDt" value="${escapeHtml(toInputDateTimeValue(new Date().toISOString()))}" />
+            </div>
+          </div>
+
+          <div class="frow">
+            <div class="label"><span>Category</span><span class="small muted">${catsReady ? "Optional" : "Add categories first"}</span></div>
+            <select id="txnCat" ${catsReady ? "" : "disabled"}>
+              <option value="">—</option>
+              ${(state.categories||[]).map(c=>`<option value="${escapeHtml(String(c.label||""))}">${escapeHtml(String(c.label||""))}</option>`).join("")}
+            </select>
+          </div>
+
+          <div class="frow">
+            <div class="label"><span>Notes</span><span class="small muted">Optional</span></div>
+            <textarea id="txnNotes" placeholder="e.g. lunch with team"></textarea>
+          </div>
+
+          <div class="hint">Creates a <span class="mono">SELF</span> transaction and updates balances immediately.</div>
+        </div>
+      `;
+
+      const footer = `
+        <button class="btn" id="txnCancel">Cancel</button>
+        <button class="btn primary" id="txnSave">Create</button>
+      `;
+
+      openModal({ title:"New self transaction", subtitle:"Add income or expense.", bodyHtml: body, footerHtml: footer, critical:false });
+
+      let ttype = "SIMPLE_OUT";
+      const setType = (type)=>{
+        ttype = type;
+        $("#txnTypeOut").classList.toggle("active", type==="SIMPLE_OUT");
+        $("#txnTypeIn").classList.toggle("active", type==="SIMPLE_IN");
+      };
+      $("#txnTypeOut").onclick = ()=> setType("SIMPLE_OUT");
+      $("#txnTypeIn").onclick = ()=> setType("SIMPLE_IN");
+
+      $("#txnCancel").onclick = ()=> closeModal("cancel");
+
+      $("#txnSave").onclick = async ()=>{
+        $("#txnAmtErr").style.display="none";
+        const amount = Number($("#txnAmt").value);
+        if(!isFinite(amount) || amount <= 0){
+          $("#txnAmtErr").style.display="";
+          $("#txnAmtErr").textContent="Please enter a valid amount > 0.";
+          return;
+        }
+        const mode = String($("#txnMode").value || "ONLINE");
+        const category = String($("#txnCat").value || "");
+        const notes = String($("#txnNotes").value || "").trim();
+        const dtIso = fromInputDateTimeValue($("#txnDt").value) || new Date().toISOString();
+
+        const key="createSelfTxn";
+        $("#txnSave").setAttribute("data-bkey", key);
+        $("#txnSave").setAttribute("data-label","Create");
+        setBtnLoading(key,true);
+
+        try{
+          await api("createSelfTxn", { type: ttype, amount, mode, category, notes, txnDateTime: dtIso });
+          toast("success","Transaction created");
+          closeModal("ok");
+          await loadTxnsScope("SELF", { silent:true });
+          await loadTxnsAll({ silent:true });
+          await loadMe({ silent:true });
+          render();
+        }catch(e){
+          toast("error","Couldn’t create transaction", e.message || "Please retry.");
+        }finally{
+          setBtnLoading(key,false);
+          const b=$("#txnSave"); if(b){ b.disabled=false; b.textContent="Create"; }
+        }
+      };
+    }
+
+    function openEditSelfTxnModal(txnId){
+      const txns = state.cache.txnsByScope.SELF || [];
+      const t = txns.find(x=>String(x.txnId)===String(txnId));
+      if(!t){ toast("info","Transaction not found"); return; }
+
+      const type = String(t.type||"SIMPLE_OUT");
+      const body = `
+        <div class="form">
+          <div class="notice">
+            <div class="nIco">${icons.info()}</div>
+            <div class="nTxt">
+              <div class="nT">Edit self transaction</div>
+              <div class="nB">You can update amount, mode, category, notes, and date/time.</div>
+            </div>
+          </div>
+
+          <div class="seg" role="tablist" aria-label="Transaction type">
+            <button id="etOut" class="${type==="SIMPLE_OUT"?"active":""}" type="button">Expense</button>
+            <button id="etIn" class="${type==="SIMPLE_IN"?"active":""}" type="button">Income</button>
+          </div>
+
+          <div class="frow">
+            <div class="label"><span>Amount (₹)</span><span class="small muted">Required</span></div>
+            <input type="number" id="etAmt" min="0" step="0.01" value="${escapeHtml(Number(t.amountTotal||0))}" />
+            <div class="err" id="etAmtErr" style="display:none"></div>
+          </div>
+
+          <div class="fgrid">
+            <div class="frow">
+              <div class="label"><span>Mode</span><span class="small muted">ONLINE/CASH</span></div>
+              <select id="etMode">
+                <option value="ONLINE" ${String(t.mode)==="ONLINE"?"selected":""}>ONLINE</option>
+                <option value="CASH" ${String(t.mode)==="CASH"?"selected":""}>CASH</option>
+              </select>
+            </div>
+            <div class="frow">
+              <div class="label"><span>Date & time</span><span class="small muted">Optional</span></div>
+              <input type="datetime-local" id="etDt" value="${escapeHtml(toInputDateTimeValue(t.txnDateTime || t.createdAt))}" />
+            </div>
+          </div>
+
+          <div class="frow">
+            <div class="label"><span>Category</span><span class="small muted">Optional</span></div>
+            <select id="etCat">
+              <option value="">—</option>
+              ${(state.categories||[]).map(c=>{
+                const v=String(c.label||"");
+                return `<option value="${escapeHtml(v)}" ${String(t.category||"")===v?"selected":""}>${escapeHtml(v)}</option>`;
+              }).join("")}
+            </select>
+          </div>
+
+          <div class="frow">
+            <div class="label"><span>Notes</span><span class="small muted">Optional</span></div>
+            <textarea id="etNotes">${escapeHtml(String(t.notes||""))}</textarea>
+          </div>
+
+          <div class="hint">Delete is permanent. Edits will recalc balances and refresh lists.</div>
+        </div>
+      `;
+
+      const footer = `
+        <button class="btn danger" id="etDelete">Delete</button>
+        <button class="btn" id="etCancel">Close</button>
+        <button class="btn primary" id="etSave">Save</button>
+      `;
+
+      openModal({ title:"Edit transaction", subtitle:`Txn ID: ${String(txnId)}`, bodyHtml: body, footerHtml: footer, critical:false });
+
+      let ttype = type;
+      const setType = (v)=>{
+        ttype = v;
+        $("#etOut").classList.toggle("active", v==="SIMPLE_OUT");
+        $("#etIn").classList.toggle("active", v==="SIMPLE_IN");
+      };
+      $("#etOut").onclick = ()=> setType("SIMPLE_OUT");
+      $("#etIn").onclick = ()=> setType("SIMPLE_IN");
+
+      $("#etCancel").onclick = ()=> closeModal("close");
+
+      $("#etSave").onclick = async ()=>{
+        $("#etAmtErr").style.display="none";
+        const amount = Number($("#etAmt").value);
+        if(!isFinite(amount) || amount <= 0){
+          $("#etAmtErr").style.display="";
+          $("#etAmtErr").textContent="Please enter a valid amount > 0.";
+          return;
+        }
+        const mode = String($("#etMode").value || "ONLINE");
+        const category = String($("#etCat").value || "");
+        const notes = String($("#etNotes").value || "").trim();
+        const dtIso = fromInputDateTimeValue($("#etDt").value) || (t.txnDateTime || new Date().toISOString());
+
+        const key="editSelfTxn";
+        $("#etSave").setAttribute("data-bkey", key);
+        $("#etSave").setAttribute("data-label","Save");
+        setBtnLoading(key,true);
+
+        try{
+          await api("updateSelfTxn", { txnId, type: ttype, amount, mode, category, notes, txnDateTime: dtIso });
+          toast("success","Transaction updated");
+          closeModal("ok");
+          await loadTxnsScope("SELF", { silent:true });
+          await loadTxnsAll({ silent:true });
+          await loadMe({ silent:true });
+          render();
+        }catch(e){
+          toast("error","Couldn’t update", e.message || "Please retry.");
+        }finally{
+          setBtnLoading(key,false);
+          const b=$("#etSave"); if(b){ b.disabled=false; b.textContent="Save"; }
+        }
+      };
+
+      $("#etDelete").onclick = async ()=>{
+        const yes = await confirmDialog({
+          title:"Delete transaction?",
+          message:"This permanently removes the transaction and recalculates your balances.",
+          confirmText:"Delete",
+          cancelText:"Cancel",
+          danger:true,
+          critical:true
+        });
+        if(!yes) return;
+
+        const key="delSelfTxn";
+        $("#etDelete").setAttribute("data-bkey", key);
+        $("#etDelete").setAttribute("data-label","Delete");
+        setBtnLoading(key,true);
+
+        try{
+          await api("deleteTxn", { txnId });
+          toast("success","Deleted");
+          closeModal("ok");
+          await loadTxnsScope("SELF", { silent:true });
+          await loadTxnsAll({ silent:true });
+          await loadMe({ silent:true });
+          render();
+        }catch(e){
+          toast("error","Couldn’t delete", e.message || "Please retry.");
+        }finally{
+          setBtnLoading(key,false);
+          const b=$("#etDelete"); if(b){ b.disabled=false; b.textContent="Delete"; }
+        }
+      };
+    }
+
+    function openAddCategoryModal(){
+      const body = `
+        <div class="form">
+          <div class="frow">
+            <div class="label"><span>Category label</span><span class="small muted">Required</span></div>
+            <input type="text" id="catLabel" placeholder="e.g. Food" />
+            <div class="err" id="catLabelErr" style="display:none"></div>
+          </div>
+          <div class="frow">
+            <div class="label"><span>Parent group</span><span class="small muted">Optional</span></div>
+            <input type="text" id="catParent" placeholder="e.g. Living" />
+          </div>
+          <div class="hint">Categories are per-user and appear across self, friends, and split flows.</div>
+        </div>
+      `;
+      const footer = `
+        <button class="btn" id="catCancel">Cancel</button>
+        <button class="btn primary" id="catSave">Add</button>
+      `;
+      openModal({ title:"Add category", subtitle:"Create a new category.", bodyHtml: body, footerHtml: footer, critical:false });
+
+      $("#catCancel").onclick = ()=> closeModal("cancel");
+      $("#catSave").onclick = async ()=>{
+        $("#catLabelErr").style.display="none";
+        const label = String($("#catLabel").value||"").trim();
+        const parentCategory = String($("#catParent").value||"").trim() || "Other";
+        if(!label){
+          $("#catLabelErr").style.display="";
+          $("#catLabelErr").textContent="Please enter a category label.";
+          return;
+        }
+        const key="addCat";
+        $("#catSave").setAttribute("data-bkey", key);
+        $("#catSave").setAttribute("data-label","Add");
+        setBtnLoading(key,true);
+        try{
+          await api("addCategory", { label, parentCategory });
+          toast("success","Category added");
+          closeModal("ok");
+          await loadCategories({ silent:true });
+          render();
+        }catch(e){
+          toast("error","Couldn’t add category", e.message || "Please retry.");
+        }finally{
+          setBtnLoading(key,false);
+          const b=$("#catSave"); if(b){ b.disabled=false; b.textContent="Add"; }
+        }
+      };
+    }
+
+    function openCategoryManagerModal(){
+      const cats = Array.isArray(state.categories) ? state.categories : [];
+      const body = `
+        <div class="form">
+          <div class="notice">
+            <div class="nIco">${icons.info()}</div>
+            <div class="nTxt">
+              <div class="nT">Categories</div>
+              <div class="nB">Add new categories or remove unused ones. (Removal is blocked if backend disallows it.)</div>
+            </div>
+          </div>
+          <div class="inline">
+            <button class="btn primary" id="cmAdd">Add category</button>
+            <button class="btn" id="cmReload">Reload</button>
+          </div>
+          <div class="divider"></div>
+          ${cats.length ? `
+            <div class="list">
+              ${cats.map(c=>{
+                const id = String(c.categoryId||c.id||c.label||"");
+                const label = String(c.label||"");
+                const parent = String(c.parentCategory||"Other");
+                return `<div class="item" data-cat="${escapeHtml(id)}">
+                  <div class="item-left">
+                    <div class="avatar" style="width:40px;height:40px;border-radius:16px;background:linear-gradient(135deg, rgba(34,199,255,.12), rgba(124,92,255,.12))">
+                      <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/></svg>
+                    </div>
+                    <div class="item-main">
+                      <div class="item-title">${escapeHtml(label)}</div>
+                      <div class="item-sub">${escapeHtml(parent)} • ${escapeHtml(id)}</div>
+                    </div>
+                  </div>
+                  <div class="item-right">
+                    <button class="btn danger small" data-del-cat="${escapeHtml(id)}">Remove</button>
+                  </div>
+                </div>`;
+              }).join("")}
+            </div>
+          ` : `<div class="hint">No categories yet.</div>`}
+        </div>
+      `;
+      const footer = `
+        <button class="btn" id="cmClose">Close</button>
+      `;
+      openModal({ title:"Manage categories", subtitle:"Your personal category list.", bodyHtml: body, footerHtml: footer, critical:false });
+
+      $("#cmClose").onclick = ()=> closeModal("close");
+      $("#cmAdd").onclick = ()=>{ closeModal("goAdd"); openAddCategoryModal(); };
+      $("#cmReload").onclick = async ()=>{ await loadCategories({ silent:false }); openCategoryManagerModal(); };
+
+      $$("[data-del-cat]").forEach(btn=>{
+        btn.onclick = async (e)=>{
+          e.stopPropagation();
+          const id = btn.getAttribute("data-del-cat");
+          const yes = await confirmDialog({
+            title:"Remove category?",
+            message:"This may fail if the backend blocks deletion. If it succeeds, it will disappear from dropdowns.",
+            confirmText:"Remove",
+            cancelText:"Cancel",
+            danger:true,
+            critical:true
+          });
+          if(!yes) return;
+
+          const key="delCat_"+id;
+          btn.setAttribute("data-bkey", key);
+          btn.setAttribute("data-label","Remove");
+          setBtnLoading(key,true);
+          try{
+            await api("removeCategory", { categoryId: id, label: id });
+            toast("success","Category removed");
+            await loadCategories({ silent:true });
+            closeModal("ok");
+            render();
+          }catch(err){
+            toast("error","Couldn’t remove", err.message || "Backend may block deletion.");
+          }finally{
+            setBtnLoading(key,false);
+          }
+        };
+      });
+    }
+
+    /* ===========================
+       FRIENDS VIEW
+       =========================== */
+
+    function renderFriends(){
+      $("#bottomNav").style.display = "";
+      const fs = Array.isArray(state.friendSummary) ? state.friendSummary : [];
+      const active = state.activeFriend;
+
+      const left = `
+        <div class="card">
+          <div class="card-h">
+            <div class="card-title">
+              <div class="t1">Friends</div>
+              <div class="t2">Send requests, view ledgers, and settle balances.</div>
+            </div>
+            <div class="inline">
+              <button class="btn small primary" id="addFriendBtn">Add</button>
+              <button class="btn small" id="reloadFriendsBtn">Reload</button>
+            </div>
+          </div>
+          <div class="card-b">
+            ${state.loading.friends ? skelList(3) : (fs.length ? `
+              <div class="list">
+                ${fs.map(f=>{
+                  const net = Number(f.netAmount || 0);
+                  const dir = String(f.direction || "SETTLED");
+                  const cls = dir === "FRIEND_OWES_ME" ? "good" : (dir === "I_OWE_FRIEND" ? "bad" : "neutral");
+                  const amtCls = dir === "FRIEND_OWES_ME" ? "good" : (dir === "I_OWE_FRIEND" ? "bad" : "neutral");
+                  const label = dir === "FRIEND_OWES_ME" ? "Owes you" : (dir === "I_OWE_FRIEND" ? "You owe" : "Settled");
+                  return `<div class="item" data-fopen="${escapeHtml(f.friendUserId)}">
+                    <div class="item-left">
+                      <div class="avatar" style="width:40px;height:40px;border-radius:16px">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/><path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/></svg>
+                      </div>
+                      <div class="item-main">
+                        <div class="item-title">${escapeHtml(f.friendName || "Friend")}</div>
+                        <div class="item-sub">${escapeHtml(label)} • ${escapeHtml(f.friendUserId || "")}</div>
+                      </div>
+                    </div>
+                    <div class="item-right">
+                      <div class="amt ${amtCls}">${formatINR(Math.abs(net))}</div>
+                      <span class="chip ${cls}">${escapeHtml(dir.replace(/_/g," "))}</span>
+                    </div>
+                  </div>`;
+                }).join("")}
+              </div>
+            ` : emptyState("No friends yet","Add a friend to start ledgers and paybacks.","Add friend", ()=>openAddFriendModal()).html)}
+          </div>
+        </div>
+      `;
+
+      const right = active ? renderFriendLedger(active.friendUserId) : `
+        <div class="rightNote">
+          <div class="rt">Open a ledger</div>
+          <div class="rb">Tap a friend to view ledger transactions and take actions like “I paid / I borrowed / Payback”.</div>
+          <div class="hr"></div>
+          <div class="hint">Ledgers are powered by <span class="mono">FRIEND</span> scoped transactions.</div>
+        </div>
+      `;
+
+      appEl.innerHTML = `
+        <div class="grid">
+          <div>${left}</div>
+          <div>${right}</div>
+        </div>
+      `;
+
+      $("#addFriendBtn").onclick = ()=> openAddFriendModal();
+      $("#reloadFriendsBtn").onclick = async ()=>{ await loadFriendSummary({ silent:false }); };
+
+      $$("[data-fopen]").forEach(el=>{
+        el.onclick = ()=> setActiveFriend(el.getAttribute("data-fopen"));
+      });
+    }
+
+    function renderFriendLedger(friendUserId){
+      const fs = knownFriends();
+      const f = fs.find(x=>String(x.id)===String(friendUserId)) || { id: friendUserId, name:"Friend", netAmount:0, direction:"SETTLED" };
+
+      const txns = (state.cache.txnsByScope.FRIEND || []).filter(t=>{
+        const other = deriveFriendCounterpartyId(t);
+        return String(other) === String(friendUserId);
+      });
+
+      const listHtml = state.loading.txns ? skelList(4) : (
+        txns.length ? `<div class="list">
+          ${txns.map(t=>{
+            const amt = Number(t.amountTotal||0);
+            const type = String(t.type||"");
+            // FRIEND_GAVE: I paid (friend owes me) => positive for me
+            const meGets = (type === "FRIEND_GAVE" || type === "PAYBACK_RECEIVED");
+            const mePays = (type === "FRIEND_TOOK" || type === "PAYBACK_SENT");
+            const sign = meGets ? "+" : (mePays ? "−" : "");
+            const amtCls = meGets ? "good" : (mePays ? "bad" : "neutral");
+            const sub = `${t.category ? String(t.category) : "—"} • ${t.mode ? String(t.mode) : "—"} • ${formatDateOnly(t.txnDateTime || t.createdAt)}`;
+            return `<div class="item" data-ftxn="${escapeHtml(t.txnId)}">
+              <div class="item-left">
+                <div class="avatar" style="width:40px;height:40px;border-radius:16px;background:linear-gradient(135deg, rgba(34,199,255,.12), rgba(255,204,102,.10))">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M12 2v20" stroke="rgba(255,255,255,.75)" stroke-width="2" stroke-linecap="round"/><path d="M5 7h14" stroke="rgba(255,255,255,.75)" stroke-width="2" stroke-linecap="round"/><path d="M7 17h10" stroke="rgba(255,255,255,.75)" stroke-width="2" stroke-linecap="round"/></svg>
+                </div>
+                <div class="item-main">
+                  <div class="item-title">${escapeHtml(type.replace(/_/g," "))}</div>
+                  <div class="item-sub">${escapeHtml(sub)}</div>
+                </div>
+              </div>
+              <div class="item-right">
+                <div class="amt ${amtCls}">${escapeHtml(sign)}${formatINR(amt)}</div>
+                ${statePillForTxn(t)}
+              </div>
+            </div>`;
+          }).join("")}
+        </div>` : emptyState("No ledger transactions","Create the first friend entry: I paid / I borrowed / payback.","Create", ()=>openFriendTxnModal(friendUserId)).html
+      );
+
+      const net = Number(f.netAmount||0);
+      const dir = String(f.direction||"SETTLED");
+      const topChip = dir === "FRIEND_OWES_ME" ? `<span class="chip good"><strong>${escapeHtml(f.name)}</strong> owes you ${formatINR(Math.abs(net))}</span>` :
+                      dir === "I_OWE_FRIEND" ? `<span class="chip bad">You owe <strong>${escapeHtml(f.name)}</strong> ${formatINR(Math.abs(net))}</span>` :
+                      `<span class="chip neutral">Settled with <strong>${escapeHtml(f.name)}</strong></span>`;
+
+      return `
+        <div class="card">
+          <div class="card-h">
+            <div class="card-title">
+              <div class="t1">Ledger • ${escapeHtml(f.name)}</div>
+              <div class="t2">Friend ledger history and settlement states.</div>
+            </div>
+            ${topChip}
+          </div>
+          <div class="card-b">
+            <div class="inline" style="gap:10px; margin-bottom:10px">
+              <button class="btn small primary" id="fNewTxn">New entry</button>
+              <button class="btn small" id="fBack">Back</button>
+            </div>
+            ${listHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    function openAddFriendModal(){
+      const body = `
+        <div class="form">
+          <div class="frow">
+            <div class="label"><span>Friend userId or username</span><span class="small muted">Required</span></div>
+            <input type="text" id="frId" placeholder="e.g. 1023 or arjun" />
+            <div class="err" id="frErr" style="display:none"></div>
+          </div>
+          <div class="hint">This sends a request. Your friend must accept from Notifications.</div>
+        </div>
+      `;
+      const footer = `
+        <button class="btn" id="frCancel">Cancel</button>
+        <button class="btn primary" id="frSend">Send request</button>
+      `;
+      openModal({ title:"Add friend", subtitle:"Send a friend request.", bodyHtml: body, footerHtml: footer, critical:false });
+      $("#frCancel").onclick = ()=> closeModal("cancel");
+      $("#frSend").onclick = async ()=>{
+        $("#frErr").style.display="none";
+        const friend = String($("#frId").value||"").trim();
+        if(!friend){ $("#frErr").style.display=""; $("#frErr").textContent="Please enter a userId or username."; return; }
+        const key="addFriendReq";
+        $("#frSend").setAttribute("data-bkey", key);
+        $("#frSend").setAttribute("data-label","Send request");
+        setBtnLoading(key,true);
+        try{
+          await api("sendFriendRequest", { friend });
+          toast("success","Request sent","Ask your friend to accept in Notifications.");
+          closeModal("ok");
+          await loadFriendSummary({ silent:true });
+          await loadNotifications({ silent:true });
+          render();
+        }catch(e){
+          toast("error","Couldn’t send request", e.message || "Please retry.");
+        }finally{
+          setBtnLoading(key,false);
+          const b=$("#frSend"); if(b){ b.disabled=false; b.textContent="Send request"; }
+        }
+      };
+    }
+
+    function openFriendTxnModal(friendUserId){
+      const body = `
+        <div class="form">
+          <div class="seg" role="tablist" aria-label="Friend entry type">
+            <button id="ftPaid" class="active" type="button">I paid</button>
+            <button id="ftBorrow" type="button">I borrowed</button>
+            <button id="ftPayback" type="button">Payback</button>
+          </div>
+
+          <div class="frow">
+            <div class="label"><span>Amount (₹)</span><span class="small muted">Required</span></div>
+            <input type="number" id="ftAmt" min="0" step="0.01" placeholder="e.g. 1200" />
+            <div class="err" id="ftAmtErr" style="display:none"></div>
+          </div>
+
+          <div class="fgrid">
+            <div class="frow">
+              <div class="label"><span>Mode</span><span class="small muted">ONLINE/CASH</span></div>
+              <select id="ftMode">
+                <option value="ONLINE">ONLINE</option>
+                <option value="CASH">CASH</option>
+              </select>
+            </div>
+            <div class="frow">
+              <div class="label"><span>Date & time</span><span class="small muted">Optional</span></div>
+              <input type="datetime-local" id="ftDt" value="${escapeHtml(toInputDateTimeValue(new Date().toISOString()))}" />
+            </div>
+          </div>
+
+          <div class="frow">
+            <div class="label"><span>Category</span><span class="small muted">Optional</span></div>
+            <select id="ftCat">
+              <option value="">—</option>
+              ${(state.categories||[]).map(c=>`<option value="${escapeHtml(String(c.label||""))}">${escapeHtml(String(c.label||""))}</option>`).join("")}
+            </select>
+          </div>
+
+          <div class="frow">
+            <div class="label"><span>Notes</span><span class="small muted">Optional</span></div>
+            <textarea id="ftNotes" placeholder="e.g. dinner split"></textarea>
+          </div>
+
+          <div class="hint">Creates a <span class="mono">FRIEND</span> transaction and updates ledger + balances.</div>
+        </div>
+      `;
+      const footer = `
+        <button class="btn" id="ftCancel">Cancel</button>
+        <button class="btn primary" id="ftCreate">Create</button>
+      `;
+      openModal({ title:"New friend entry", subtitle:`Friend: ${String(friendUserId)}`, bodyHtml: body, footerHtml: footer, critical:false });
+
+      let ftype = "FRIEND_GAVE"; // I paid
+      const setType = (t)=>{
+        ftype=t;
+        $("#ftPaid").classList.toggle("active", t==="FRIEND_GAVE");
+        $("#ftBorrow").classList.toggle("active", t==="FRIEND_TOOK");
+        $("#ftPayback").classList.toggle("active", t==="PAYBACK");
+      };
+      $("#ftPaid").onclick = ()=> setType("FRIEND_GAVE");
+      $("#ftBorrow").onclick = ()=> setType("FRIEND_TOOK");
+      $("#ftPayback").onclick = ()=> setType("PAYBACK");
+
+      $("#ftCancel").onclick = ()=> closeModal("cancel");
+
+      $("#ftCreate").onclick = async ()=>{
+        $("#ftAmtErr").style.display="none";
+        const amount = Number($("#ftAmt").value);
+        if(!isFinite(amount) || amount <= 0){
+          $("#ftAmtErr").style.display="";
+          $("#ftAmtErr").textContent="Please enter a valid amount > 0.";
+          return;
+        }
+        const mode = String($("#ftMode").value||"ONLINE");
+        const category = String($("#ftCat").value||"");
+        const notes = String($("#ftNotes").value||"").trim();
+        const dtIso = fromInputDateTimeValue($("#ftDt").value) || new Date().toISOString();
+
+        const key="createFriendTxn";
+        $("#ftCreate").setAttribute("data-bkey", key);
+        $("#ftCreate").setAttribute("data-label","Create");
+        setBtnLoading(key,true);
+
+        try{
+          await api("createFriendTxn", { friendUserId, type: ftype, amount, mode, category, notes, txnDateTime: dtIso });
+          toast("success","Entry created");
+          closeModal("ok");
+          await loadFriendSummary({ silent:true });
+          await loadTxnsScope("FRIEND", { silent:true });
+          await loadTxnsAll({ silent:true });
+          await loadMe({ silent:true });
+          setActiveFriend(friendUserId);
+          render();
+        }catch(e){
+          toast("error","Couldn’t create entry", e.message || "Please retry.");
+        }finally{
+          setBtnLoading(key,false);
+          const b=$("#ftCreate"); if(b){ b.disabled=false; b.textContent="Create"; }
+        }
+      };
+    }
+
+    /* ===========================
+       SPLITS VIEW (minimal, but complete hooks)
+       =========================== */
+
+    function renderSplits(){
+      $("#bottomNav").style.display = "";
+      const splits = Array.isArray(state.cache.txnsByScope.SPLIT) ? state.cache.txnsByScope.SPLIT : [];
+      const active = state.activeSplit;
+
+      const left = `
+        <div class="card">
+          <div class="card-h">
+            <div class="card-title">
+              <div class="t1">Splits</div>
+              <div class="t2">Create split bills, track states, and confirm payments.</div>
+            </div>
+            <div class="inline">
+              <button class="btn small primary" id="newSplitBtn">New split</button>
+              <button class="btn small" id="reloadSplitsBtn">Reload</button>
+            </div>
+          </div>
+          <div class="card-b">
+            ${state.loading.txns ? skelList(4) : (splits.length ? `
+              <div class="list">
+                ${splits.map(t=>{
+                  const amt = Number(t.amountTotal||0);
+                  const title = String(t.title || t.category || "Split bill");
+                  const sub = `${t.mode ? String(t.mode) : "—"} • ${formatDateOnly(t.txnDateTime || t.createdAt)} • ${String(t.txnId||"")}`;
+                  return `<div class="item" data-sopen="${escapeHtml(t.txnId)}">
+                    <div class="item-left">
+                      <div class="avatar" style="width:40px;height:40px;border-radius:16px;background:linear-gradient(135deg, rgba(124,92,255,.18), rgba(18,255,163,.12))">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M3 12h18" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/></svg>
+                      </div>
+                      <div class="item-main">
+                        <div class="item-title">${escapeHtml(title)}</div>
+                        <div class="item-sub">${escapeHtml(sub)}</div>
+                      </div>
+                    </div>
+                    <div class="item-right">
+                      <div class="amt neutral">${formatINR(amt)}</div>
+                      ${statePillForTxn(t)}
+                    </div>
+                  </div>`;
+                }).join("")}
+              </div>
+            ` : emptyState("No splits yet","Create your first split bill with participants.","Create split", ()=>openCreateSplitModal()).html)}
+          </div>
+        </div>
+      `;
+
+      const right = active ? renderSplitDetail(active.txnId) : `
+        <div class="rightNote">
+          <div class="rt">Split detail</div>
+          <div class="rb">Tap a split to open details, participants, and payment confirmations.</div>
+          <div class="hr"></div>
+          <div class="hint">Split flows use <span class="mono">SPLIT</span> transactions and notification actions.</div>
+        </div>
+      `;
+
+      appEl.innerHTML = `
+        <div class="grid">
+          <div>${left}</div>
+          <div>${right}</div>
+        </div>
+      `;
+
+      $("#newSplitBtn").onclick = ()=> openCreateSplitModal();
+      $("#reloadSplitsBtn").onclick = async ()=>{ await loadTxnsScope("SPLIT", { silent:false }); };
+
+      $$("[data-sopen]").forEach(el=>{
+        el.onclick = ()=> setActiveSplit(el.getAttribute("data-sopen"));
+      });
+    }
+
+    function renderSplitDetail(txnId){
+      const t = (state.cache.txnsByScope.SPLIT||[]).find(x=>String(x.txnId)===String(txnId));
+      if(!t){
+        return `<div class="rightNote"><div class="rt">Not found</div><div class="rb">This split is not available in cache.</div></div>`;
+      }
+      const body = `
+        <div class="splitline">
+          <div class="l"><div class="t">Amount</div><div class="s">Total split amount</div></div>
+          <div class="r"><div style="font-weight:950">${formatINR(Number(t.amountTotal||0))}</div></div>
+        </div>
+        <div class="splitline">
+          <div class="l"><div class="t">Mode</div><div class="s">ONLINE/CASH</div></div>
+          <div class="r"><div style="font-weight:950">${escapeHtml(String(t.mode||"—"))}</div></div>
+        </div>
+        <div class="splitline">
+          <div class="l"><div class="t">State</div><div class="s">Workflow state</div></div>
+          <div class="r">${statePillForTxn(t)}</div>
+        </div>
+        <div class="splitline">
+          <div class="l"><div class="t">Created</div><div class="s">${escapeHtml(String(t.txnId||""))}</div></div>
+          <div class="r"><div class="small muted">${escapeHtml(formatDateTime(t.createdAt||t.txnDateTime))}</div></div>
+        </div>
+      `;
+
+      return `
+        <div class="card">
+          <div class="card-h">
+            <div class="card-title">
+              <div class="t1">Split detail</div>
+              <div class="t2">Transaction info and state. Use actions if your backend supports them.</div>
+            </div>
+            <button class="btn small" id="splitBackBtn">Back</button>
+          </div>
+          <div class="card-b">
+            ${body}
+            <div class="hr"></div>
+            <div class="inline">
+              <button class="btn" id="splitMarkPaidBtn">Mark paid</button>
+              <button class="btn primary" id="splitConfirmBtn">Confirm received</button>
+            </div>
+            <div class="hint" style="margin-top:10px">These actions require backend handlers. If not implemented, backend will return an error.</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function openCreateSplitModal(){
+      const body = `
+        <div class="form">
+          <div class="frow">
+            <div class="label"><span>Title</span><span class="small muted">Optional</span></div>
+            <input type="text" id="spTitle" placeholder="e.g. Goa Trip Hotel" />
+          </div>
+
+          <div class="frow">
+            <div class="label"><span>Total amount (₹)</span><span class="small muted">Required</span></div>
+            <input type="number" id="spAmt" min="0" step="0.01" placeholder="e.g. 12000" />
+            <div class="err" id="spAmtErr" style="display:none"></div>
+          </div>
+
+          <div class="fgrid">
+            <div class="frow">
+              <div class="label"><span>Mode</span><span class="small muted">ONLINE/CASH</span></div>
+              <select id="spMode">
+                <option value="ONLINE">ONLINE</option>
+                <option value="CASH">CASH</option>
+              </select>
+            </div>
+            <div class="frow">
+              <div class="label"><span>Date & time</span><span class="small muted">Optional</span></div>
+              <input type="datetime-local" id="spDt" value="${escapeHtml(toInputDateTimeValue(new Date().toISOString()))}" />
+            </div>
+          </div>
+
+          <div class="frow">
+            <div class="label"><span>Participants (userIds)</span><span class="small muted">Comma separated</span></div>
+            <input type="text" id="spPeople" placeholder="e.g. 1023, 1055, 1102" />
+            <div class="hint">Backend should split equally unless you support custom shares.</div>
+          </div>
+
+          <div class="frow">
+            <div class="label"><span>Notes</span><span class="small muted">Optional</span></div>
+            <textarea id="spNotes" placeholder="Any details..."></textarea>
+          </div>
+        </div>
+      `;
+      const footer = `
+        <button class="btn" id="spCancel">Cancel</button>
+        <button class="btn primary" id="spCreate">Create split</button>
+      `;
+      openModal({ title:"Create split", subtitle:"Split a bill among participants.", bodyHtml: body, footerHtml: footer, critical:false });
+
+      $("#spCancel").onclick = ()=> closeModal("cancel");
+      $("#spCreate").onclick = async ()=>{
+        $("#spAmtErr").style.display="none";
+        const amount = Number($("#spAmt").value);
+        if(!isFinite(amount) || amount <= 0){
+          $("#spAmtErr").style.display="";
+          $("#spAmtErr").textContent="Please enter a valid amount > 0.";
+          return;
+        }
+        const title = String($("#spTitle").value||"").trim();
+        const mode = String($("#spMode").value||"ONLINE");
+        const notes = String($("#spNotes").value||"").trim();
+        const dtIso = fromInputDateTimeValue($("#spDt").value) || new Date().toISOString();
+        const participants = String($("#spPeople").value||"")
+          .split(",").map(x=>x.trim()).filter(Boolean);
+
+        const key="createSplit";
+        $("#spCreate").setAttribute("data-bkey", key);
+        $("#spCreate").setAttribute("data-label","Create split");
+        setBtnLoading(key,true);
+
+        try{
+          const data = await api("createSplit", { title, amount, mode, notes, txnDateTime: dtIso, participants });
+          toast("success","Split created");
+          closeModal("ok");
+          await loadTxnsScope("SPLIT", { silent:true });
+          await loadTxnsAll({ silent:true });
+          await loadMe({ silent:true });
+          // open created split if backend returns txnId
+          if(data && data.txnId) setActiveSplit(data.txnId);
+          render();
+        }catch(e){
+          toast("error","Couldn’t create split", e.message || "Please retry.");
+        }finally{
+          setBtnLoading(key,false);
+          const b=$("#spCreate"); if(b){ b.disabled=false; b.textContent="Create split"; }
+        }
+      };
+    }
+
+    /* ===========================
+       NOTIFICATIONS VIEW
+       =========================== */
+
+    function renderNotifs(){
+      $("#bottomNav").style.display = "";
+      const filter = state.ui.notifsFilter || "unread";
+      const list = Array.isArray(state.notifs) ? state.notifs : [];
+      const shown = list.filter(n=>{
+        const unread = !truthy(n.isRead);
+        return filter === "all" ? true : unread;
+      });
+
+      const html = `
+        <div class="card">
+          <div class="card-h">
+            <div class="card-title">
+              <div class="t1">Notifications</div>
+              <div class="t2">Friend requests, approvals, confirmations, and action items.</div>
+            </div>
+            <div class="inline">
+              <div class="seg" style="margin-right:6px">
+                <button id="nfUnread" class="${filter==="unread"?"active":""}" type="button">Unread</button>
+                <button id="nfAll" class="${filter==="all"?"active":""}" type="button">All</button>
+              </div>
+              <button class="btn small" id="reloadNotifsBtn">Reload</button>
+            </div>
+          </div>
+          <div class="card-b">
+            ${state.loading.notifs ? skelList(4) : (
+              shown.length ? `<div class="list">
+                ${shown.map(n=>{
+                  const title = String(n.title || n.type || "Notification");
+                  const body = String(n.body || n.message || "");
+                  const when = formatDateOnly(n.createdAt || n.at || "");
+                  const unread = !truthy(n.isRead);
+                  return `<div class="item" data-nid="${escapeHtml(String(n.notifId||n.id||""))}">
+                    <div class="item-left">
+                      <div class="avatar" style="width:40px;height:40px;border-radius:16px;background:linear-gradient(135deg, rgba(100,181,255,.12), rgba(124,92,255,.12))">
+                        ${unread ? icons.warn() : icons.info()}
+                      </div>
+                      <div class="item-main">
+                        <div class="item-title">${escapeHtml(title)} ${unread ? `<span class="chip pillWarn" style="margin-left:8px">UNREAD</span>` : ``}</div>
+                        <div class="item-sub">${escapeHtml(when)}</div>
+                        ${body ? `<div class="small muted" style="margin-top:2px; line-height:1.35; white-space:normal">${escapeHtml(body)}</div>` : ``}
+                      </div>
+                    </div>
+                    <div class="item-right">
+                      <button class="btn small" data-markread="${escapeHtml(String(n.notifId||n.id||""))}">Mark read</button>
+                      <button class="btn small primary" data-openact="${escapeHtml(String(n.notifId||n.id||""))}">Open</button>
+                    </div>
+                  </div>`;
+                }).join("")}
+              </div>` : emptyState("No notifications","You're all caught up.","Reload", ()=>loadNotifications({ silent:false })).html
+            )}
+          </div>
+        </div>
+      `;
+
+      appEl.innerHTML = html;
+
+      $("#nfUnread").onclick = ()=>{ state.ui.notifsFilter="unread"; render(); };
+      $("#nfAll").onclick = ()=>{ state.ui.notifsFilter="all"; render(); };
+      $("#reloadNotifsBtn").onclick = async ()=>{ await loadNotifications({ silent:false }); };
+
+      $$("[data-markread]").forEach(btn=>{
+        btn.onclick = async (e)=>{
+          e.stopPropagation();
+          const id = btn.getAttribute("data-markread");
+          try{
+            await api("markNotificationRead", { notifId: id });
+            toast("success","Marked read");
+            await loadNotifications({ silent:true });
+            render();
+          }catch(err){
+            toast("error","Couldn’t mark read", err.message || "Please retry.");
+          }
+        };
+      });
+
+      $$("[data-openact]").forEach(btn=>{
+        btn.onclick = (e)=>{
+          e.stopPropagation();
+          const id = btn.getAttribute("data-openact");
+          openNotificationActionModal(id);
+        };
+      });
+    }
+
+    function openNotificationActionModal(notifId){
+      const n = (state.notifs||[]).find(x=>String(x.notifId||x.id||"")===String(notifId));
+      if(!n){ toast("info","Notification not found"); return; }
+
+      const title = String(n.title || n.type || "Notification");
+      const msg = String(n.body || n.message || "");
+      const type = String(n.type || "");
+
+      const body = `
+        <div class="form">
+          <div class="notice">
+            <div class="nIco">${icons.info()}</div>
+            <div class="nTxt">
+              <div class="nT">${escapeHtml(title)}</div>
+              <div class="nB">${escapeHtml(msg || "—")}</div>
+            </div>
+          </div>
+          <div class="hint">If your backend supports action handlers, use the buttons below. Otherwise it may return an error.</div>
+        </div>
+      `;
+
+      const footer = `
+        <button class="btn" id="naClose">Close</button>
+        <button class="btn danger" id="naReject">Reject</button>
+        <button class="btn primary" id="naAccept">Accept</button>
+      `;
+
+      openModal({ title:"Notification", subtitle:`Type: ${type || "—"}`, bodyHtml: body, footerHtml: footer, critical:false });
+
+      $("#naClose").onclick = ()=> closeModal("close");
+      $("#naReject").onclick = async ()=>{
+        const key="notifReject";
+        $("#naReject").setAttribute("data-bkey", key);
+        $("#naReject").setAttribute("data-label","Reject");
+        setBtnLoading(key,true);
+        try{
+          await api("notificationAction", { notifId, action: "REJECT" });
+          toast("success","Action sent");
+          closeModal("ok");
+          await loadNotifications({ silent:true });
+          await loadFriendSummary({ silent:true });
+          render();
+        }catch(e){
+          toast("error","Action failed", e.message || "Please retry.");
+        }finally{
+          setBtnLoading(key,false);
+        }
+      };
+      $("#naAccept").onclick = async ()=>{
+        const key="notifAccept";
+        $("#naAccept").setAttribute("data-bkey", key);
+        $("#naAccept").setAttribute("data-label","Accept");
+        setBtnLoading(key,true);
+        try{
+          await api("notificationAction", { notifId, action: "ACCEPT" });
+          toast("success","Action sent");
+          closeModal("ok");
+          await loadNotifications({ silent:true });
+          await loadFriendSummary({ silent:true });
+          render();
+        }catch(e){
+          toast("error","Action failed", e.message || "Please retry.");
+        }finally{
+          setBtnLoading(key,false);
+        }
+      };
+    }
+
+    /* ===========================
+       PROFILE VIEW
+       =========================== */
+
+      /* ===========================
+       PROFILE VIEW
+       =========================== */
+
+    /* ===========================
+     PROFILE VIEW
+     =========================== */
+
+  function defaultAvatarDataUrl(){
+    const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">
+      <rect width="100%" height="100%" rx="14" ry="14" fill="rgba(255,255,255,.08)"/>
+      <circle cx="32" cy="26" r="10" fill="rgba(255,255,255,.22)"/>
+      <rect x="14" y="40" width="36" height="16" rx="8" fill="rgba(255,255,255,.18)"/>
+    </svg>`.trim();
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  }
+
+  function renderProfile(){
+    $("#bottomNav").style.display = "";
+    const me = state.me || {};
+    const name  = String(me.name || me.username || "");
+    const email = String(me.email || "");
+    const phone = String(me.phone || "");
+    const upi   = String(me.upi || me.upiId || "");
+    const photo = String(me.photoDataUrl || "");
+
+    const html = `
+      <div class="grid">
+        <div>
+          <div class="card">
+            <div class="card-h">
+              <div class="card-title">
+                <div class="t1">Profile</div>
+                <div class="t2">Update photo, name, phone, email, and UPI.</div>
+              </div>
+              <button class="btn small" id="reloadMeBtn">Reload</button>
+            </div>
+
+            <div class="card-b">
+              <div class="form">
+                <div class="imgprev">
+                  <img
+                    src="${escapeHtml(photo || defaultAvatarDataUrl())}"
+                    alt="Profile photo"
+                    referrerpolicy="no-referrer"
+                  />
+                  <div class="meta" style="min-width:0">
+                    <div class="m1">${escapeHtml(name || "—")}</div>
+                    <div class="m2">${escapeHtml(email || "—")}</div>
+                    <div class="inline" style="margin-top:8px">
+                      <label class="btn small" style="cursor:pointer">
+                        ${icons.receipt()}<span>Upload photo</span>
+                        <input type="file" id="photoFile" accept="image/*" style="display:none" />
+                      </label>
+                      <button class="btn small" id="removePhotoBtn">Remove</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="fgrid">
+                  <div class="frow">
+                    <div class="label"><span>Name</span><span class="small muted">Optional</span></div>
+                    <input type="text" id="pfName" value="${escapeHtml(name)}" placeholder="Your name" />
+                  </div>
+                  <div class="frow">
+                    <div class="label"><span>Phone</span><span class="small muted">10 digits</span></div>
+                    <input type="tel" id="pfPhone" inputmode="numeric" value="${escapeHtml(phone)}" placeholder="e.g. 9876543210" />
+                    <div class="err" id="pfPhoneErr" style="display:none"></div>
+                  </div>
+                </div>
+
+                <div class="fgrid">
+                  <div class="frow">
+                    <div class="label"><span>Email</span><span class="small muted">Sensitive</span></div>
+                    <input type="email" id="pfEmail" value="${escapeHtml(email)}" placeholder="you@email.com" />
+                    <div class="err" id="pfEmailErr" style="display:none"></div>
+                  </div>
+                  <div class="frow">
+                    <div class="label"><span>UPI ID</span><span class="small muted">For receiving</span></div>
+                    <input type="text" id="pfUpi" value="${escapeHtml(upi)}" placeholder="e.g. name@bank" />
+                    <div class="err" id="pfUpiErr" style="display:none"></div>
+                  </div>
+                </div>
+
+                <div class="notice">
+                  <div class="nIco">${icons.shield()}</div>
+                  <div class="nTxt">
+                    <div class="nT">Sensitive updates</div>
+                    <div class="nB">Backend should require current password or OTP for email/password changes.</div>
+                  </div>
+                </div>
+
+                <div class="stickyActions">
+                  <button class="btn" id="changePassBtn">Update password</button>
+                  <button class="btn primary" id="saveProfileBtn">Save changes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="rightNote">
+            <div class="rt">Security</div>
+            <div class="rb">If you see “Network error” on save, apply the <span class="mono">text/plain</span> header fix in <span class="mono">api()</span>.</div>
+            <div class="hr"></div>
+            <div class="inline">
+              <button class="btn" id="pingBtn">Ping backend</button>
+              <button class="btn danger" id="logoutBtn2">Logout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    appEl.innerHTML = html;
+
+    // ---------- bindings ----------
+    $("#reloadMeBtn").onclick = async ()=>{ await loadMe({ silent:false }); render(); };
+    $("#logoutBtn2").onclick = ()=> logout();
+
+    $("#pingBtn").onclick = async ()=>{
+      try{
+        setOverlay(true,"Pinging","Checking backend…");
+        const r = await fetch(BACKEND_URL, { method:"GET" });
+        const txt = await r.text();
+        toast("success","Backend reachable", String(txt).slice(0,120));
+      }catch(e){
+        toast("error","Backend ping failed","Check URL / connectivity.");
+      }finally{
+        setOverlay(false);
+      }
+    };
+
+    $("#removePhotoBtn").onclick = async ()=>{
+      const yes = await confirmDialog({
+        title:"Remove photo?",
+        message:"This will clear your profile photo.",
+        confirmText:"Remove",
+        cancelText:"Cancel",
+        danger:true,
+        critical:true
+      });
+      if(!yes) return;
+      try{
+        await api("updateProfile", { photoDataUrl: "" });
+        toast("success","Photo removed");
+        await loadMe({ silent:true });
+        render();
+      }catch(err){
+        toast("error","Couldn’t remove photo", err.message || "Please retry.");
+      }
+    };
+
+    $("#photoFile").onchange = async ()=>{
+      const inp = $("#photoFile");
+      const file = inp.files && inp.files[0];
+      if(!file) return;
+
+      // basic file guards (prevents crashes)
+      const isImg = /^image\//.test(file.type || "");
+      const maxBytes = 3 * 1024 * 1024; // 3MB raw file guard
+      if(!isImg){
+        toast("error","Invalid file","Please select an image.");
+        inp.value = "";
+        return;
+      }
+      if(file.size > maxBytes){
+        toast("error","Image too large","Please choose a smaller photo (≤ 3MB).");
+        inp.value = "";
+        return;
+      }
+
+      try{
+        setOverlay(true,"Processing","Optimizing photo…");
+        const dataUrl = await compressImageToDataUrl(file, 900, 0.78);
+        await api("updateProfile", { photoDataUrl: dataUrl });
+        toast("success","Photo updated");
+        await loadMe({ silent:true });
+        render();
+      }catch(err){
+        toast("error","Photo upload failed", err.message || "Please retry.");
+      }finally{
+        setOverlay(false);
+        inp.value = "";
+      }
+    };
+
+    $("#saveProfileBtn").onclick = async ()=>{
+      clearErr(["pfPhoneErr","pfEmailErr","pfUpiErr"]);
+
+      const newName  = String($("#pfName").value||"").trim();
+      const newPhone = String($("#pfPhone").value||"").trim();
+      const newEmail = String($("#pfEmail").value||"").trim();
+      const newUpi   = String($("#pfUpi").value||"").trim();
+
+      let ok = true;
+      if(newPhone && !isPhone10(newPhone)){ showErr("pfPhoneErr","Phone must be exactly 10 digits."); ok=false; }
+      if(newEmail && !isEmail(newEmail)){ showErr("pfEmailErr","Please enter a valid email."); ok=false; }
+      if(newUpi && !isUpi(newUpi)){ showErr("pfUpiErr","Please enter a valid UPI ID (e.g. name@bank)."); ok=false; }
+      if(!ok) return;
+
+      const key="saveProfile";
+      const btn = $("#saveProfileBtn");
+      btn.setAttribute("data-bkey", key);
+      btn.setAttribute("data-label","Save changes");
+      setBtnLoading(key,true);
+
+      try{
+        await api("updateProfile", { name:newName, phone:newPhone, email:newEmail, upi:newUpi });
+        toast("success","Profile updated");
+        await loadMe({ silent:true });
+        render();
+      }catch(err){
+        toast("error","Couldn’t save profile", err.message || "Please retry.");
+      }finally{
+        setBtnLoading(key,false);
+        if(btn){ btn.disabled=false; btn.textContent="Save changes"; }
+      }
+    };
+
+    $("#changePassBtn").onclick = ()=> openChangePasswordModal();
+  }
+
+  function openChangePasswordModal(){
+    const body = `
+      <div class="form">
+        <div class="frow">
+          <div class="label"><span>Current password</span><span class="small muted">Required</span></div>
+          <input type="password" id="cpOld" autocomplete="current-password" />
+          <div class="err" id="cpOldErr" style="display:none"></div>
+        </div>
+        <div class="frow">
+          <div class="label"><span>New password</span><span class="small muted">8+ chars, letters+numbers</span></div>
+          <input type="password" id="cpNew" autocomplete="new-password" />
+          <div class="err" id="cpNewErr" style="display:none"></div>
+        </div>
+        <div class="hint">Backend should enforce sensitive update rules. This UI provides strong client validation.</div>
+      </div>
+    `;
+    const footer = `
+      <button class="btn" id="cpCancel">Cancel</button>
+      <button class="btn primary" id="cpSave">Update</button>
+    `;
+    openModal({ title:"Update password", subtitle:"Confirm current password first.", bodyHtml: body, footerHtml: footer, critical:false });
+
+    $("#cpCancel").onclick = ()=> closeModal("cancel");
+    $("#cpSave").onclick = async ()=>{
+      clearErr(["cpOldErr","cpNewErr"]);
+      const oldPassword = String($("#cpOld").value||"");
+      const newPassword = String($("#cpNew").value||"");
+
+      let ok=true;
+      if(!oldPassword){ showErr("cpOldErr","Please enter your current password."); ok=false; }
+      if(!newPassword){ showErr("cpNewErr","Please enter a new password."); ok=false; }
+      else if(!strongPassword(newPassword)){ showErr("cpNewErr","Use 8+ chars with letters and numbers."); ok=false; }
+      if(!ok) return;
+
+      const key="chgPass";
+      const btn = $("#cpSave");
+      btn.setAttribute("data-bkey", key);
+      btn.setAttribute("data-label","Update");
+      setBtnLoading(key,true);
+
+      try{
+        await api("changePassword", { oldPassword, newPassword });
+        toast("success","Password updated");
+        closeModal("ok");
+      }catch(err){
+        toast("error","Couldn’t update password", err.message || "Please retry.");
+      }finally{
+        setBtnLoading(key,false);
+        if(btn){ btn.disabled=false; btn.textContent="Update"; }
+      }
+    };
+  }
+
+  // IMPORTANT: fix global click handler (icons inside buttons)
+  document.addEventListener("click",(e)=>{
+    const t = e.target;
+
+    if(t.closest("#fNewTxn")){
+      const fid = state.activeFriend?.friendUserId;
+      if(fid) openFriendTxnModal(fid);
+      return;
+    }
+
+    if(t.closest("#fBack")){
+      state.activeFriend = null;
+      render();
+      return;
+    }
+
+    if(t.closest("#splitBackBtn")){
+      state.activeSplit = null;
+      render();
+      return;
+    }
+
+    if(t.closest("#splitMarkPaidBtn")){
+      const txnId = state.activeSplit?.txnId;
+      if(!txnId) return;
+      (async ()=>{
+        try{
+          await api("splitAction", { txnId, action:"MARK_PAID" });
+          toast("success","Marked paid");
+          await loadTxnsScope("SPLIT",{silent:true});
+          render();
+        }catch(err){
+          toast("error","Action failed", err.message || "Backend not implemented.");
+        }
+      })();
+      return;
+    }
+
+    if(t.closest("#splitConfirmBtn")){
+      const txnId = state.activeSplit?.txnId;
+      if(!txnId) return;
+      (async ()=>{
+        try{
+          await api("splitAction", { txnId, action:"CONFIRM_RECEIVED" });
+          toast("success","Confirmed received");
+          await loadTxnsScope("SPLIT",{silent:true});
+          render();
+        }catch(err){
+          toast("error","Action failed", err.message || "Backend not implemented.");
+        }
+      })();
+      return;
+    }
+  });
+
+  /* ===========================
+     BOOT
+     =========================== */
+
+  async function boot(){
+    setOnlinePill();
+    // Restore session (if any)
+    const userId = localStorage.getItem("userId");
+    const meRaw = localStorage.getItem("me");
+    const meCached = meRaw ? safeParseJson(meRaw) : null;
+
+    if(userId && meCached && String(meCached.userId||"") === String(userId)){
+      state.me = meCached;
+      state.view = "home";
+      $("#bottomNav").style.display = "";
+      render();
+      // Load fresh data in the background (silently)
+      await ensureCoreData({ silent:true });
+      render();
+    }else{
+      state.view = "auth";
+      $("#bottomNav").style.display = "none";
+      render();
+    }
+  }
+
+  // Kickoff
+  boot();
+
+  </script>
+</body>
+</html>
