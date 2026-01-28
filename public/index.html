@@ -62,6 +62,10 @@
         /* Make inputs a bit tighter on small screens */
         .input-field { padding: 0.75rem; }
         @media (min-width: 640px) { .input-field { padding: 1rem; } }
+        /* Mobile name handling */
+        .name-ellipsis { max-width: 14rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        @media (max-width: 639px) { .name-ellipsis { max-width: 9.5rem; } }
+        @media (max-width: 400px) { .name-ellipsis { max-width: 7.5rem; } }
     
         .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 99999; }
 
@@ -76,7 +80,7 @@
 <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300 font-sans h-screen w-screen overflow-hidden">
     <div id="root" class="h-full w-full"></div>
     <script type="text/babel">
-        const API_URL = "https://script.google.com/macros/s/AKfycbwektarNyGBxfVMtJSSfPUvZ4cwDv-iiVUqYTf-XPPdUXJGCawDdG-E4pHrOtueXXU/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbwYSaZjnnxbRvAZGUQRGNH2Z3PA5IFlrWF1n-dtBEQdDLO--oFVBNHvHNnFPsA3FWY/exec";
         const { useState, useEffect, useMemo, useRef } = React;
         const { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, Tooltip, XAxis, Legend } = window.Recharts || {};
         const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
@@ -333,6 +337,14 @@
             div.textContent = text || '';
             return div.innerHTML;
         }
+        async function fileToDataUrl(file){
+            return new Promise((resolve, reject)=>{
+                const reader = new FileReader();
+                reader.onload = () => resolve(String(reader.result || ""));
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
         function safeJsonParse(value, fallback) {
             if (value === null || value === undefined || value === '') return fallback;
             if (typeof value === 'object') return value;
@@ -376,6 +388,12 @@
             const desc = String(t.description || '');
             const match = desc.match(/SRC:([A-Za-z0-9_]+)/);
             return match ? match[1] : '';
+        };
+        const getDisplayName = (value) => {
+            const raw = String(value || '').trim();
+            if (!raw) return 'User';
+            if (raw.includes('@')) return raw.split('@')[0];
+            return raw;
         };
         const formatDateDisplay = (dateStr) => {
             if (!dateStr) return '';
@@ -598,12 +616,32 @@
             slate:   { bg: '#0f172a', class: 'bg-slate-900',   text: 'text-slate-900',   border: 'border-slate-900' },
             sky:     { bg: '#0ea5e9', class: 'bg-sky-600',     text: 'text-sky-600',     border: 'border-sky-600' }
         };
-        function Avatar({ imageId, name, size="md", theme }) {
+        function Avatar({ imageId, imageSrc, name, size="md", theme }) {
             const [err, setErr] = useState(false);
+            const [src, setSrc] = useState(null);
             const dims = size==='lg'?'w-24 h-24 text-4xl':size==='sm'?'w-8 h-8 text-xs':'w-12 h-12 text-base';
-            const url = imageId ? `https://drive.google.com/thumbnail?id=${imageId}&sz=w400` : null;
             const borderColor = (THEMES[theme] && THEMES[theme].bg) || '#cbd5e1';
-            return <div className={`shrink-0 rounded-full flex items-center justify-center overflow-hidden ${dims} ${(!url || err) && 'bg-slate-100 dark:bg-slate-800'}`} style={{color: THEMES[theme] ? THEMES[theme].bg : undefined, borderColor: borderColor, borderStyle: 'solid', borderWidth: '1px'}}>{url && !err ? <img loading="lazy" src={url} className="w-full h-full object-cover" onError={()=>setErr(true)}/> : <span className="font-bold">{name?name[0].toUpperCase():'?'}</span>}</div>;
+
+            useEffect(() => {
+                const next = imageSrc || (imageId ? `https://drive.google.com/thumbnail?id=${imageId}&sz=w400` : null);
+                setSrc(next);
+                setErr(false);
+            }, [imageId, imageSrc]);
+
+            const handleError = () => {
+                if (imageId && src && src.includes('thumbnail')) {
+                    setSrc(`https://drive.google.com/uc?export=view&id=${imageId}`);
+                    setErr(false);
+                    return;
+                }
+                setErr(true);
+            };
+
+            return (
+                <div className={`shrink-0 rounded-full flex items-center justify-center overflow-hidden ${dims} ${(!src || err) && 'bg-slate-100 dark:bg-slate-800'}`} style={{color: THEMES[theme] ? THEMES[theme].bg : undefined, borderColor: borderColor, borderStyle: 'solid', borderWidth: '1px'}}>
+                    {src && !err ? <img loading="lazy" src={src} className="w-full h-full object-cover" onError={handleError}/> : <span className="font-bold">{name?name[0].toUpperCase():'?'}</span>}
+                </div>
+            );
         }
         function ConfirmDialog({ 
             isOpen, 
@@ -1604,7 +1642,7 @@ const handleConfirmReceipt = async (t, status) => {
             return (
                 <div className="h-full w-full flex flex-col bg-slate-50 dark:bg-slate-950">
                     <header className="px-6 py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center z-20">
-                        <div className="flex items-center gap-3"><Avatar imageId={currentUser.imageId} name={currentUser.name} theme={theme} /><div><h1 className="font-bold dark:text-white leading-tight">Hi, {currentUser.name.split(' ')[0]}</h1>
+                        <div className="flex items-center gap-3"><Avatar imageId={currentUser.imageId} imageSrc={currentUser.imageSrc} name={currentUser.name} theme={theme} /><div><h1 className="font-bold dark:text-white leading-tight name-ellipsis">Hi, {getDisplayName(currentUser.name).split(' ')[0]}</h1>
                     {confirmDialog.isOpen && (
                         <ConfirmDialog
                             isOpen={confirmDialog.isOpen}
@@ -1980,7 +2018,7 @@ const handleConfirmReceipt = async (t, status) => {
                         
                         {view === 'profile' && (
                             <div className="space-y-6 animate-fade">
-                                <ProfileView user={currentUser} onUpdate={u => setCurrentUser(u)} theme={theme} setTheme={setTheme} setAccentColor={setAccentColor} mutate={mutate} />
+                                <ProfileView user={currentUser} onUpdate={u => setCurrentUser(u)} theme={theme} setTheme={setTheme} setAccentColor={setAccentColor} mutate={mutate} refreshData={() => fetchData(lastFetchParams)} />
                                 <div className="px-4"><p className="text-xs font-bold text-slate-400 uppercase mb-3">Settings</p>
                                     <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-4 space-y-4">
                                         <div className="flex justify-between items-center"><span className="text-sm font-bold dark:text-white">Monthly Budget</span><input type="number" className="w-24 text-right bg-slate-100 dark:bg-slate-800 rounded-lg px-2 py-1 text-sm outline-none" placeholder="0" value={budget} onChange={e=>{setBudget(e.target.value); localStorage.setItem('fm_budget', e.target.value);}} /></div>
@@ -2012,9 +2050,9 @@ const handleConfirmReceipt = async (t, status) => {
                         <div className="absolute top-0 left-0 w-full h-20 bg-white dark:bg-slate-900 flex items-center px-4 z-50 border-b border-slate-200 dark:border-slate-800 animate-fade">
                             <button onClick={()=>setSelectedFriend(null)} className="p-2 -ml-2 text-slate-500"><i data-lucide="arrow-left" className="w-6 h-6"></i></button>
                             <div className="ml-3 flex items-center gap-3">
-                                <Avatar imageId={selectedFriend.imageId} name={selectedFriend.name} theme={theme} />
+                                <Avatar imageId={selectedFriend.imageId} imageSrc={selectedFriend.imageSrc} name={selectedFriend.name} theme={theme} />
                                 <div>
-                                    <h2 className="font-bold text-lg dark:text-white truncate max-w-[180px] sm:max-w-none">{selectedFriend.name}</h2>
+                                    <h2 className="font-bold text-lg dark:text-white truncate max-w-[180px] sm:max-w-none name-ellipsis">{selectedFriend.name}</h2>
                                     <p className={`text-xs font-bold ${(selectedFriend.hasPending && Number(selectedFriend.net) === 0) ? 'text-amber-500' : selectedFriend.net > 0 ? 'text-emerald-500' : selectedFriend.net < 0 ? 'text-red-500' : 'text-slate-400'}`}>
                                         {(selectedFriend.hasPending && Number(selectedFriend.net) === 0)
                                             ? 'Has pending transactions'
@@ -2280,8 +2318,8 @@ const handleConfirmReceipt = async (t, status) => {
                     showToast('Please upload an image file', 'error');
                     return;
                 }
-                compressImage(file).then(b64 => setForm({...form, imageBase64: b64}));
-            };
+            fileToDataUrl(file).then(b64 => setForm({...form, imageBase64: b64}));
+        };
            
             const submit = async (e) => {
                 e.preventDefault();
@@ -3007,7 +3045,7 @@ if(items.length === 0) {
                 showToast('Please upload an image file', 'error');
                 return;
             }
-            compressImage(file).then(b64 => setManualForm({...manualForm, imageBase64: b64})); 
+            fileToDataUrl(file).then(b64 => setManualForm({...manualForm, imageBase64: b64})); 
         }; 
         
         const submitManual = async (e) => { 
@@ -3091,10 +3129,20 @@ if(items.length === 0) {
         ); 
     }
     
-    function ProfileView({ user, onUpdate, theme, setTheme, setAccentColor, mutate }) { 
+    function ProfileView({ user, onUpdate, theme, setTheme, setAccentColor, mutate, refreshData }) { 
         const { showToast } = useToast();
         const [form, setForm] = useState({ username: user.name, phone: user.phone, imageBase64: '' }); 
         const [loading, setLoading] = useState(false); 
+        const updateStoredUser = (updated) => {
+            try {
+                const saved = localStorage.getItem('fm_plat_user');
+                if (!saved) return;
+                const parsed = JSON.parse(saved);
+                if (!parsed || !parsed.id) return;
+                const merged = { ...parsed, ...updated };
+                localStorage.setItem('fm_plat_user', JSON.stringify(merged));
+            } catch(e) {}
+        };
         
         const handleImage = (e) => { 
             const file = e.target.files[0]; 
@@ -3105,33 +3153,49 @@ if(items.length === 0) {
                 showToast(`Image too large. Max size is ${MAX_SIZE_MB}MB`, 'error');
                 return;
             }
-            if (!file.type.startsWith('image/')) {
+            const isImageType = file.type ? file.type.startsWith('image/') : /\.(png|jpe?g|gif|webp|heic|heif)$/i.test(file.name || '');
+            if (!isImageType) {
                 showToast('Please upload an image file', 'error');
                 return;
             }
-            compressImage(file).then(b64 => setForm({...form, imageBase64: b64})); 
+            fileToDataUrl(file).then(b64 => setForm({...form, imageBase64: b64})); 
         }; 
         
         const save = async () => {
             setLoading(true);
             try {
+                const payload = {
+                    action: 'updateUserProfile',
+                    userId: user.id,
+                    username: (form.username || '').toString().trim(),
+                    phone: (form.phone === null || form.phone === undefined) ? '' : String(form.phone).trim(),
+                    imageBase64: form.imageBase64 || ''
+                };
                 if (mutate) {
-                    const json = await mutate({ action: 'updateUserProfile', userId: user.id, ...form });
+                    const json = await mutate(payload);
                     if (json && json.success) {
-                        const newUser = json.user ? { ...user, ...json.user } : { ...user, name: form.username, phone: form.phone };
-                        if (json.imageId) newUser.imageId = json.imageId;
-                        onUpdate(newUser);
-                        showToast('Updated!', 'success');
+                    const newUser = json.user ? { ...user, ...json.user } : { ...user, name: form.username, phone: form.phone };
+                    if (json.imageId) newUser.imageId = json.imageId;
+                    if (form.imageBase64) newUser.imageSrc = form.imageBase64;
+                    onUpdate(newUser);
+                    updateStoredUser(newUser);
+                    if (form.imageBase64) setForm(prev => ({ ...prev, imageBase64: '' }));
+                    if (refreshData) refreshData();
+                    showToast('Updated!', 'success');
                     } else {
                         showToast(json?.error || 'Error', "error");
                     }
                 } else {
-                    const json = await apiPost({ action: 'updateUserProfile', userId: user.id, ...form });
+                    const json = await apiPost(payload);
                     if (json && json.success) {
-                        const newUser = json.user ? { ...user, ...json.user } : { ...user, name: form.username, phone: form.phone };
-                        if (json.imageId) newUser.imageId = json.imageId;
-                        onUpdate(newUser);
-                        showToast('Updated!', 'success');
+                    const newUser = json.user ? { ...user, ...json.user } : { ...user, name: form.username, phone: form.phone };
+                    if (json.imageId) newUser.imageId = json.imageId;
+                    if (form.imageBase64) newUser.imageSrc = form.imageBase64;
+                    onUpdate(newUser);
+                    updateStoredUser(newUser);
+                    if (form.imageBase64) setForm(prev => ({ ...prev, imageBase64: '' }));
+                    if (refreshData) refreshData();
+                    showToast('Updated!', 'success');
                     } else {
                         showToast(json?.error || 'Error', "error");
                     }
@@ -3144,13 +3208,13 @@ if(items.length === 0) {
             <div className="animate-fade space-y-8 p-2">
                 <div className="flex flex-col items-center">
                     <label className="relative cursor-pointer group">
-                        <Avatar imageId={user.imageId} name={user.name} size="lg" theme={theme} />
+                        <Avatar imageId={user.imageId} imageSrc={form.imageBase64 || user.imageSrc} name={user.name} size="lg" theme={theme} />
                         <div className={`absolute bottom-0 right-0 rounded-full p-1 text-white ${THEMES[theme].class}`}>
                             <i data-lucide="camera" className="w-4 h-4"></i>
                         </div>
                         <input type="file" className="hidden" accept="image/*" onChange={handleImage} />
                     </label>
-                    <p className="mt-4 text-sm text-slate-400 font-bold">{user.name || 'User'}</p>
+                    <p className="mt-4 text-sm text-slate-400 font-bold name-ellipsis">{getDisplayName(user.name)}</p>
                 </div>
                 <input className="input-field" value={form.username} onChange={e=>setForm({...form, username:e.target.value})} placeholder="Name" />
                 <input className="input-field" value={form.phone} onChange={e=>setForm({...form, phone:e.target.value})} placeholder="Phone" />
