@@ -3150,7 +3150,7 @@ if(items.length === 0) {
                         </div>
                         <input type="file" className="hidden" accept="image/*" onChange={handleImage} />
                     </label>
-                    <p className="mt-4 text-sm text-slate-400 font-bold">{user.email}</p>
+                    <p className="mt-4 text-sm text-slate-400 font-bold">{user.name || 'User'}</p>
                 </div>
                 <input className="input-field" value={form.username} onChange={e=>setForm({...form, username:e.target.value})} placeholder="Name" />
                 <input className="input-field" value={form.phone} onChange={e=>setForm({...form, phone:e.target.value})} placeholder="Phone" />
@@ -3190,11 +3190,13 @@ if(items.length === 0) {
             setLoading(true); 
             setMsg(null); 
             try { 
-                const emailError = validateEmail(form.email);
-                if (emailError) {
-                    showToast(emailError, 'error');
-                    setLoading(false);
-                    return;
+                if (view === 'signup') {
+                    const emailError = validateEmail(form.email);
+                    if (emailError) {
+                        showToast(emailError, 'error');
+                        setLoading(false);
+                        return;
+                    }
                 }
                 if (view === 'signup') {
                     const passwordError = validatePassword(form.password);
@@ -3207,7 +3209,7 @@ if(items.length === 0) {
                 const url = view === 'login' ? `${API_URL}?action=login&email=${form.email}&password=${form.password}` : API_URL; 
                 const opts = view === 'login' ? {} : { method: 'POST', body: JSON.stringify({ action: view, ...form }) }; 
                 const json = view === 'login'
-                    ? await apiGet({ action: 'login', email: form.email, password: form.password })
+                    ? await apiGet({ action: 'login', identifier: form.email, password: form.password })
                     : await apiPost({ action: view, ...form }); 
                 if(json.success) { 
                     if(view === 'login') onLogin({ ...json.user, sessionToken: json.sessionToken, sessionExpiry: json.sessionExpiry }); 
