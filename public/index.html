@@ -1043,7 +1043,7 @@
 // - We create a repayment_out (Pending) with a source link.
 // - Backend creates reciprocal repayment_in (Pending) for creditor.
 // - Creditor confirms (Confirmed) or rejects (Rejected).
-const handleNotifyPayment = async (t) => {
+const handleNotifyPayment = async (t, modeOverride) => {
     const effectiveType = getEffectiveType(t, currentUser.id);
     if (effectiveType !== 'borrowed') {
         showToast('This action is only for amounts you owe.', 'error');
@@ -1087,6 +1087,9 @@ const handleNotifyPayment = async (t) => {
 
     try {
         const today = formatLocalDate(new Date());
+        const paymentMode = (modeOverride === 'Cash' || modeOverride === 'Online')
+            ? modeOverride
+            : ((t.paymentMode === 'Cash' || t.paymentMode === 'Online') ? t.paymentMode : 'Online');
         const repayment = {
             action: 'addTransaction',
             userId: currentUser.id,
@@ -1097,7 +1100,7 @@ const handleNotifyPayment = async (t) => {
             date: today,
             relatedPerson: linkedPerson.id,
             relatedUserId: linkedPerson.linkedUserId || t.relatedUserId || '',
-            paymentMode: 'Internal',
+            paymentMode: paymentMode,
             status: 'Pending'
         };
         const addRes = await mutate(repayment, { skipFetch: true });
@@ -1112,7 +1115,7 @@ const handleNotifyPayment = async (t) => {
     }
 };
 
-const handleConfirmReceipt = async (t, status) => {
+const handleConfirmReceipt = async (t, status, modeOverride) => {
     // t is a repayment_in transaction owned by current user (creditor)
     const effectiveType = getEffectiveType(t, currentUser.id);
     if (effectiveType !== 'repayment_in') {
@@ -1122,6 +1125,14 @@ const handleConfirmReceipt = async (t, status) => {
     if (t.status !== 'Pending' && t.status !== 'Approved') {
         showToast('This repayment is already resolved.', 'info');
         return;
+    }
+    if (status === 'Confirmed' && (modeOverride === 'Cash' || modeOverride === 'Online')) {
+        try {
+            await mutate({ action: 'updateTransaction', transactionId: t.id, userId: currentUser.id, updates: { paymentMode: modeOverride } }, { skipFetch: true });
+        } catch (e) {
+            showToast('Failed to set payment mode', 'error');
+            return;
+        }
     }
     handleApproval(t, status); // uses synced backend update + refresh
 };
@@ -1203,33 +1214,35 @@ const handleConfirmReceipt = async (t, status) => {
                     
                     // FINANCIAL RULE: Balance mutation based on status + txn type
                     const canAffectBalances = canMutateBalancesForTxn(t);
+                    const isLoan = effectiveType === 'lent' || effectiveType === 'borrowed';
+                    const loanCounts = isLoan && t.status !== 'Rejected' && t.status !== 'Deleted';
                     
                     const amt = toCents(t.amount);
                     const d = t.date.split('T')[0];
                     if(!graph[d]) graph[d] = {date:d, val:0};
                     
+                    // DEDUP: Ignore duplicate repayment notifications for the same source.
+                    if (effectiveType === 'repayment_in' || effectiveType === 'repayment_out') {
+                        const srcKey = getRepaymentSrcKey(t);
+                        if (srcKey) {
+                            const k = `${effectiveType}|${srcKey}`;
+                            if (processedRepaymentSrc.has(k)) return;
+                            processedRepaymentSrc.add(k);
+                        }
+                    }
+
+                    // DEDUP: If both sides of a linked txn are present, count it once.
+                    if (t.relatedUserId && ['lent','borrowed','repayment_in','repayment_out'].includes(effectiveType)) {
+                        const key = pairKeyFor(t, amt);
+                        if (key && processedPairKeys.has(key)) return;
+                        if (key) processedPairKeys.add(key);
+                    }
+
                     // FINANCIAL RULE: Only confirmed movements affect available balances
                     if (canAffectBalances) {
                         // Ignore synced non-personal income/expense (safety)
                         if (!isMine && (effectiveType === 'income' || effectiveType === 'expense')) {
                             return;
-                        }
-
-                        // DEDUP: Ignore duplicate repayment notifications for the same source.
-                        if (effectiveType === 'repayment_in' || effectiveType === 'repayment_out') {
-                            const srcKey = getRepaymentSrcKey(t);
-                            if (srcKey) {
-                                const k = `${effectiveType}|${srcKey}`;
-                                if (processedRepaymentSrc.has(k)) return;
-                                processedRepaymentSrc.add(k);
-                            }
-                        }
-
-                        // DEDUP: If both sides of a linked txn are present, count it once.
-                        if (t.relatedUserId && ['lent','borrowed','repayment_in','repayment_out'].includes(effectiveType)) {
-                            const key = pairKeyFor(t, amt);
-                            if (key && processedPairKeys.has(key)) return;
-                            if (key) processedPairKeys.add(key);
                         }
 
                         if (effectiveType === 'income') {
@@ -1244,37 +1257,42 @@ const handleConfirmReceipt = async (t, status) => {
                             const normalizedCategory = normalizeCategory(t.category);
                             catMap[normalizedCategory] = (catMap[normalizedCategory]||0)+amt;
                         }
-                        else if (effectiveType === 'lent') {
+                    }
+
+                    // Loans (lent/borrowed): count in receivable/payable even if Pending.
+                    if (loanCounts) {
+                        if (effectiveType === 'lent') {
                             // "Internal" = receivable created without an additional cash/online movement (e.g., split bill IOU)
-                            if (t.paymentMode !== 'Internal') {
+                            if (canAffectBalances && t.paymentMode !== 'Internal') {
                                 t.paymentMode === 'Cash' ? cashBal -= amt : onlineBal -= amt;
                                 graph[d].val -= amt;
                             }
                             asset += amt;
                             loanNet += amt;
-                        }
-                        else if (effectiveType === 'borrowed') {
+                        } else if (effectiveType === 'borrowed') {
                             // "Internal" = payable created without an additional cash/online movement
-                            if (t.paymentMode !== 'Internal') {
+                            if (canAffectBalances && t.paymentMode !== 'Internal') {
                                 t.paymentMode === 'Cash' ? cashBal += amt : onlineBal += amt;
                                 graph[d].val += amt;
                             }
                             liability += amt;
                             loanNet -= amt;
                         }
-                        else if (effectiveType === 'repayment_in') {
-                            if (t.paymentMode !== 'Internal') {
-                                t.paymentMode === 'Cash' ? cashBal += amt : onlineBal += amt;
-                                graph[d].val += amt;
-                            }
+                    }
+
+                    // Repayments only affect balances once confirmed/approved
+                    if (canAffectBalances) {
+                        if (effectiveType === 'repayment_in') {
+                            const pm = (t.paymentMode === 'Cash' || t.paymentMode === 'Online') ? t.paymentMode : 'Online';
+                            pm === 'Cash' ? cashBal += amt : onlineBal += amt;
+                            graph[d].val += amt;
                             asset -= amt; 
                             loanNet -= amt;
                         }
                         else if (effectiveType === 'repayment_out') {
-                            if (t.paymentMode !== 'Internal') {
-                                t.paymentMode === 'Cash' ? cashBal -= amt : onlineBal -= amt;
-                                graph[d].val -= amt;
-                            }
+                            const pm = (t.paymentMode === 'Cash' || t.paymentMode === 'Online') ? t.paymentMode : 'Online';
+                            pm === 'Cash' ? cashBal -= amt : onlineBal -= amt;
+                            graph[d].val -= amt;
                             liability -= amt; 
                             loanNet += amt;
                         }
@@ -1310,6 +1328,7 @@ const handleConfirmReceipt = async (t, status) => {
                         const creatorEmail = t.creatorEmail ? t.creatorEmail.toLowerCase() : "";
                         const amt = toCents(t.amount);
                         const effectiveType = getEffectiveType(t, currentUser.id);
+                        const isLoan = effectiveType === 'lent' || effectiveType === 'borrowed';
 
                         // Determine if this transaction involves this person (linked or manual)
                         const involvesLinked = friendLinkedUserId && t.relatedUserId && (
@@ -1325,6 +1344,10 @@ const handleConfirmReceipt = async (t, status) => {
                         // FINANCIAL RULE: Pending does not affect net, but we flag it for UI
                         if (t.status === 'Pending') {
                             hasPending = true;
+                            if (isLoan) {
+                                if (effectiveType === 'lent') net += amt;               // they owe me (pending)
+                                else if (effectiveType === 'borrowed') net -= amt;      // I owe them (pending)
+                            }
                             return;
                         }
 
@@ -1639,10 +1662,30 @@ const handleConfirmReceipt = async (t, status) => {
                 );
             };
             
+            if (!currentUser) {
+                return (
+                    <div className="h-full w-full flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+                        <div className="text-slate-400 text-sm font-bold">Loading...</div>
+                    </div>
+                );
+            }
+
             return (
+
                 <div className="h-full w-full flex flex-col bg-slate-50 dark:bg-slate-950">
                     <header className="px-6 py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center z-20">
-                        <div className="flex items-center gap-3"><Avatar imageId={currentUser.imageId} imageSrc={currentUser.imageSrc} name={currentUser.name} theme={theme} /><div><h1 className="font-bold dark:text-white leading-tight name-ellipsis">Hi, {getDisplayName(currentUser.name).split(' ')[0]}</h1>
+                        <div className="flex items-center gap-3">
+                            <Avatar imageId={currentUser.imageId} imageSrc={currentUser.imageSrc} name={currentUser.name} theme={theme} />
+                            <div>
+                                <h1 className="font-bold dark:text-white leading-tight name-ellipsis">Hi, {getDisplayName(currentUser.name).split(' ')[0]}</h1>
+                            </div>
+                        </div>
+                        <div className="flex gap-2">
+                            <button onClick={handleRefresh} className={`icon-btn flex items-center justify-center ${refreshing ? 'animate-spin-once' : ''}`} style={{color: THEMES[theme].bg, transition: 'all 0.3s'}}><i data-lucide="refresh-cw" className="w-5 h-5"></i></button>
+                            <button onClick={()=>setDarkMode(!darkMode)} className="icon-btn"><i data-lucide={darkMode?"sun":"moon"} className="w-5 h-5"></i></button>
+                            <button onClick={onLogout} className="icon-btn text-red-500 bg-red-50 dark:bg-red-900/20"><i data-lucide="log-out" className="w-5 h-5"></i></button>
+                        </div>
+                    </header>
                     {confirmDialog.isOpen && (
                         <ConfirmDialog
                             isOpen={confirmDialog.isOpen}
@@ -1653,15 +1696,6 @@ const handleConfirmReceipt = async (t, status) => {
                             type={confirmDialog.type}
                         />
                     )}
-
-
-                </div></div>
-                        <div className="flex gap-2">
-                            <button onClick={handleRefresh} className={`icon-btn flex items-center justify-center ${refreshing ? 'animate-spin-once' : ''}`} style={{color: THEMES[theme].bg, transition: 'all 0.3s'}}><i data-lucide="refresh-cw" className="w-5 h-5"></i></button>
-                            <button onClick={()=>setDarkMode(!darkMode)} className="icon-btn"><i data-lucide={darkMode?"sun":"moon"} className="w-5 h-5"></i></button>
-                            <button onClick={onLogout} className="icon-btn text-red-500 bg-red-50 dark:bg-red-900/20"><i data-lucide="log-out" className="w-5 h-5"></i></button>
-                        </div>
-                    </header>
                     <div className="flex-1 overflow-y-auto p-4 pb-24 space-y-6">
                        
                         {view === 'home' && (
@@ -1744,6 +1778,7 @@ const handleConfirmReceipt = async (t, status) => {
                                     );
 
                                     const isRepaymentIn = (effectiveType === 'repayment_in');
+                                    const hasPaymentMode = (t.paymentMode === 'Cash' || t.paymentMode === 'Online');
 
                                     return (
                                         <div key={t.id} className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-indigo-200 dark:border-indigo-900 shadow-sm">
@@ -1786,21 +1821,48 @@ const handleConfirmReceipt = async (t, status) => {
                                                         <button onClick={()=>handleConfirmReceipt(t, 'Rejected')} className="flex-1 py-3 rounded-xl bg-red-50 text-red-600 font-bold border border-red-100 hover:bg-red-100 dark:bg-red-900/20 dark:border-red-900/50">
                                                             Not received
                                                         </button>
-                                                        <button onClick={()=>handleConfirmReceipt(t, 'Confirmed')} className="flex-1 py-3 rounded-xl bg-emerald-50 text-emerald-600 font-bold border border-emerald-100 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-900/50">
-                                                            Received
-                                                        </button>
+                                                        {hasPaymentMode ? (
+                                                            <button onClick={()=>handleConfirmReceipt(t, 'Confirmed')} className="flex-1 py-3 rounded-xl bg-emerald-50 text-emerald-600 font-bold border border-emerald-100 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-900/50">
+                                                                Received
+                                                            </button>
+                                                        ) : (
+                                                            <>
+                                                                <button onClick={()=>handleConfirmReceipt(t, 'Confirmed', 'Online')} className="flex-1 py-3 rounded-xl bg-emerald-50 text-emerald-600 font-bold border border-emerald-100 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-900/50">
+                                                                    Received Online
+                                                                </button>
+                                                                <button onClick={()=>handleConfirmReceipt(t, 'Confirmed', 'Cash')} className="flex-1 py-3 rounded-xl bg-emerald-50 text-emerald-600 font-bold border border-emerald-100 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-900/50">
+                                                                    Received Cash
+                                                                </button>
+                                                            </>
+                                                        )}
                                                     </>
                                                 )}
 
                                                 {/* Debtor notifies payment once */}
                                                 {canNotifyPayment && (
-                                                    <button
-                                                        disabled={repaymentAlreadyNotified}
-                                                        onClick={()=>handleNotifyPayment(t)}
-                                                        className={`flex-1 py-3 rounded-xl font-bold border ${repaymentAlreadyNotified ? 'bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed' : 'bg-indigo-50 text-indigo-600 border-indigo-100 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:border-indigo-900/50'}`}
-                                                    >
-                                                        {repaymentAlreadyNotified ? 'Payment notified' : 'Notify payment'}
-                                                    </button>
+                                                    repaymentAlreadyNotified ? (
+                                                        <button
+                                                            disabled
+                                                            className="flex-1 py-3 rounded-xl font-bold border bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed"
+                                                        >
+                                                            Payment notified
+                                                        </button>
+                                                    ) : (
+                                                        <>
+                                                            <button
+                                                                onClick={()=>handleNotifyPayment(t, 'Online')}
+                                                                className="flex-1 py-3 rounded-xl font-bold border bg-indigo-50 text-indigo-600 border-indigo-100 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:border-indigo-900/50"
+                                                            >
+                                                                Notify Online
+                                                            </button>
+                                                            <button
+                                                                onClick={()=>handleNotifyPayment(t, 'Cash')}
+                                                                className="flex-1 py-3 rounded-xl font-bold border bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-900/50"
+                                                            >
+                                                                Notify Cash
+                                                            </button>
+                                                        </>
+                                                    )
                                                 )}
                                             </div>
                                         </div>
@@ -2045,7 +2107,7 @@ const handleConfirmReceipt = async (t, status) => {
                                 <div className="relative"><i data-lucide={v==='home'?'home':v==='history'?'list':v==='people'?'users':v==='requests'?'bell':'user'} className={`w-6 h-6 ${view===v && 'fill-current opacity-20'}`}></i>{v==='requests' && requests.length > 0 && <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>}</div>
                             </button>
                         ))}
-                    </div>
+                    </div> )
                     {selectedFriend && (
                         <div className="absolute top-0 left-0 w-full h-20 bg-white dark:bg-slate-900 flex items-center px-4 z-50 border-b border-slate-200 dark:border-slate-800 animate-fade">
                             <button onClick={()=>setSelectedFriend(null)} className="p-2 -ml-2 text-slate-500"><i data-lucide="arrow-left" className="w-6 h-6"></i></button>
