@@ -80,7 +80,7 @@
 <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300 font-sans h-screen w-screen overflow-hidden">
     <div id="root" class="h-full w-full"></div>
     <script type="text/babel">
-        const API_URL = "https://script.google.com/macros/s/AKfycbwYSaZjnnxbRvAZGUQRGNH2Z3PA5IFlrWF1n-dtBEQdDLO--oFVBNHvHNnFPsA3FWY/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbwvwGT0ia32YPYVm8-ACRR0oFeZOni6rEG0QpHwZ0r6b1R9O5uTdnsjRYUJMd18qWM/exec";
         const { useState, useEffect, useMemo, useRef } = React;
         const { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, Tooltip, XAxis, Legend } = window.Recharts || {};
         const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
@@ -409,6 +409,8 @@
             if (t.type === 'borrowed') return 'lent';
             if (t.type === 'repayment_in') return 'repayment_out';
             if (t.type === 'repayment_out') return 'repayment_in';
+            if (t.type === 'repayment_in_prev') return 'repayment_out_prev';
+            if (t.type === 'repayment_out_prev') return 'repayment_in_prev';
             return t.type;
         };
         
@@ -1201,6 +1203,7 @@ const handleConfirmReceipt = async (t, status, modeOverride) => {
                     const dateKey = (t.date || '').split('T')[0];
                     const group = (t.type === 'lent' || t.type === 'borrowed') ? 'loan'
                                 : (t.type === 'repayment_in' || t.type === 'repayment_out') ? 'repayment'
+                                : (t.type === 'repayment_in_prev' || t.type === 'repayment_out_prev') ? 'repayment_prev'
                                 : String(t.type || '');
                     return `${a}|${b}|${group}|${dateKey}|${amtCents}`;
                 };
@@ -1232,7 +1235,7 @@ const handleConfirmReceipt = async (t, status, modeOverride) => {
                     }
 
                     // DEDUP: If both sides of a linked txn are present, count it once.
-                    if (t.relatedUserId && ['lent','borrowed','repayment_in','repayment_out'].includes(effectiveType)) {
+                    if (t.relatedUserId && ['lent','borrowed','repayment_in','repayment_out','repayment_in_prev','repayment_out_prev'].includes(effectiveType)) {
                         const key = pairKeyFor(t, amt);
                         if (key && processedPairKeys.has(key)) return;
                         if (key) processedPairKeys.add(key);
@@ -1296,6 +1299,17 @@ const handleConfirmReceipt = async (t, status, modeOverride) => {
                             liability -= amt; 
                             loanNet += amt;
                         }
+                        else if (effectiveType === 'repayment_in_prev' || effectiveType === 'repayment_out_prev') {
+                            // Previous/offline repayments: move balances only (no loan net changes)
+                            const pm = (t.paymentMode === 'Cash' || t.paymentMode === 'Online') ? t.paymentMode : 'Online';
+                            if (effectiveType === 'repayment_in_prev') {
+                                pm === 'Cash' ? cashBal += amt : onlineBal += amt;
+                                graph[d].val += amt;
+                            } else {
+                                pm === 'Cash' ? cashBal -= amt : onlineBal -= amt;
+                                graph[d].val -= amt;
+                            }
+                        }
                     }
                 });
                 
@@ -1329,6 +1343,7 @@ const handleConfirmReceipt = async (t, status, modeOverride) => {
                         const amt = toCents(t.amount);
                         const effectiveType = getEffectiveType(t, currentUser.id);
                         const isLoan = effectiveType === 'lent' || effectiveType === 'borrowed';
+                        const isPrevRepayment = effectiveType === 'repayment_in_prev' || effectiveType === 'repayment_out_prev';
 
                         // Determine if this transaction involves this person (linked or manual)
                         const involvesLinked = friendLinkedUserId && t.relatedUserId && (
@@ -1353,6 +1368,8 @@ const handleConfirmReceipt = async (t, status, modeOverride) => {
 
                         // FINANCIAL RULE: Only confirmed/approved movements affect net
                         if (!canMutateBalancesForTxn(t)) return;
+                        // Previous/offline repayments do not affect net
+                        if (isPrevRepayment) return;
 
                         if (effectiveType === 'repayment_in' || effectiveType === 'repayment_out') {
                             const srcKey = getRepaymentSrcKey(t);
@@ -1399,11 +1416,11 @@ const handleConfirmReceipt = async (t, status, modeOverride) => {
                 const list = data.transactions.filter(t => {
                     if (!(t.status === 'Pending' || t.status === 'Approved')) return false;
                     // Only show repayment_in (receiver confirms). Never show repayment_out.
-                    if (t.type === 'repayment_out') return false;
+                    if (t.type === 'repayment_out' || t.type === 'repayment_out_prev') return false;
                     const creator = (t.creatorEmail || '').toLowerCase();
                     // If I created it, it's not a request for me (except repayment_in which is always for receiver)
                     if (t.type !== 'repayment_in' && creator && meEmail && creator === meEmail) return false;
-                    return ['lent','borrowed','repayment_in'].includes(t.type);
+                    return ['lent','borrowed','repayment_in','repayment_in_prev'].includes(t.type);
                 });
 
                 const seen = new Set();
@@ -1463,6 +1480,7 @@ const handleConfirmReceipt = async (t, status, modeOverride) => {
                 const dateKey = (t.date || '').split('T')[0];
                 const group = (t.type === 'lent' || t.type === 'borrowed') ? 'loan'
                             : (t.type === 'repayment_in' || t.type === 'repayment_out') ? 'repayment'
+                            : (t.type === 'repayment_in_prev' || t.type === 'repayment_out_prev') ? 'repayment_prev'
                             : String(t.type || '');
                 return `${a}|${b}|${group}|${dateKey}|${amtCents}`;
             }
@@ -1531,9 +1549,9 @@ const handleConfirmReceipt = async (t, status, modeOverride) => {
                     if (filterType && filterType !== 'ALL') {
                         const effectiveType = getEffectiveType(t, currentUser.id);
 
-                        const incomingTypes = ['income', 'borrowed', 'repayment_in'];
-                        const outgoingTypes = ['expense', 'lent', 'repayment_out'];
-                        const repaymentTypes = ['repayment_in', 'repayment_out'];
+                        const incomingTypes = ['income', 'borrowed', 'repayment_in', 'repayment_in_prev'];
+                        const outgoingTypes = ['expense', 'lent', 'repayment_out', 'repayment_out_prev'];
+                        const repaymentTypes = ['repayment_in', 'repayment_out', 'repayment_in_prev', 'repayment_out_prev'];
 
                         if (filterType === 'INCOMING' && !incomingTypes.includes(effectiveType)) return false;
                         if (filterType === 'OUTGOING' && !outgoingTypes.includes(effectiveType)) return false;
@@ -1567,14 +1585,14 @@ const handleConfirmReceipt = async (t, status, modeOverride) => {
                         }
                     }
 
-                    if (t.relatedUserId && ['lent','borrowed','repayment_in','repayment_out'].includes(effectiveType)) {
+                    if (t.relatedUserId && ['lent','borrowed','repayment_in','repayment_out','repayment_in_prev','repayment_out_prev'].includes(effectiveType)) {
                         const key = historyPairKeyFor(t, amt);
                         if (key && processed.has(key)) return;
                         if (key) processed.add(key);
                     }
                     
-                    if (['income', 'borrowed', 'repayment_in'].includes(effectiveType)) inc += amt;
-                    else if (['expense', 'lent', 'repayment_out'].includes(effectiveType)) out += amt;
+                    if (['income', 'borrowed', 'repayment_in', 'repayment_in_prev'].includes(effectiveType)) inc += amt;
+                    else if (['expense', 'lent', 'repayment_out', 'repayment_out_prev'].includes(effectiveType)) out += amt;
                 });
                 return { in: fromCents(inc), out: fromCents(out) };
             }, [filteredHistory, currentUser.id]);
@@ -1586,8 +1604,8 @@ const handleConfirmReceipt = async (t, status, modeOverride) => {
                 for(let i=0; i<firstDay; i++) grid.push(null);
                 for(let i=1; i<=daysInMonth; i++) {
                     const dateStr = formatLocalDate(new Date(calYear, calMonth, i));
-                    const hasInc = data.transactions.some(t => t.date.startsWith(dateStr) && ['income','repayment_in','borrowed'].includes(getEffectiveType(t, currentUser.id)) && canMutateBalancesForTxn(t));
-                    const hasExp = data.transactions.some(t => t.date.startsWith(dateStr) && ['expense','lent','repayment_out'].includes(getEffectiveType(t, currentUser.id)) && canMutateBalancesForTxn(t));
+                    const hasInc = data.transactions.some(t => t.date.startsWith(dateStr) && ['income','repayment_in','repayment_in_prev','borrowed'].includes(getEffectiveType(t, currentUser.id)) && canMutateBalancesForTxn(t));
+                    const hasExp = data.transactions.some(t => t.date.startsWith(dateStr) && ['expense','lent','repayment_out','repayment_out_prev'].includes(getEffectiveType(t, currentUser.id)) && canMutateBalancesForTxn(t));
                     grid.push({ day: i, date: dateStr, hasInc, hasExp });
                 }
                 return grid;
@@ -1793,11 +1811,13 @@ const handleConfirmReceipt = async (t, status, modeOverride) => {
                                                 </div>
                                                 <div className="text-right">
                                                     <span className="font-bold text-xl block dark:text-white">{formatMoney(t.amount)}</span>
-                                                    <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded ${effectiveType==='borrowed'?'bg-amber-100 text-amber-600':effectiveType==='lent'?'bg-blue-100 text-blue-600':effectiveType==='repayment_in'?'bg-emerald-100 text-emerald-700':'bg-slate-100 text-slate-600'}`}>
+                                                    <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded ${effectiveType==='borrowed'?'bg-amber-100 text-amber-600':effectiveType==='lent'?'bg-blue-100 text-blue-600':(effectiveType==='repayment_in' || effectiveType==='repayment_in_prev')?'bg-emerald-100 text-emerald-700':'bg-slate-100 text-slate-600'}`}>
                                                         {effectiveType === 'borrowed' ? 'You Owe' :
                                                          effectiveType === 'lent' ? 'They Owe' :
                                                          effectiveType === 'repayment_in' ? 'Confirm Receipt' :
-                                                         effectiveType === 'repayment_out' ? 'Awaiting Confirmation' : effectiveType}
+                                                         effectiveType === 'repayment_out' ? 'Awaiting Confirmation' :
+                                                         effectiveType === 'repayment_in_prev' ? 'Prev Repayment (In)' :
+                                                         effectiveType === 'repayment_out_prev' ? 'Prev Repayment (Out)' : effectiveType}
                                                     </span>
                                                 </div>
                                             </div>
@@ -1978,7 +1998,7 @@ const handleConfirmReceipt = async (t, status, modeOverride) => {
                                             
                                             if (selectedFriend && !involvesFriend(t, selectedFriend)) return null;
 
-                                            if (t.relatedUserId && ['lent','borrowed','repayment_in','repayment_out'].includes(effectiveType)) {
+                                            if (t.relatedUserId && ['lent','borrowed','repayment_in','repayment_out','repayment_in_prev','repayment_out_prev'].includes(effectiveType)) {
                                                 const key = historyPairKeyFor(t, toCents(t.amount));
                                                 if (key && processedHistoryPairs.has(key)) return null;
                                                 if (key) processedHistoryPairs.add(key);
@@ -2013,7 +2033,11 @@ const handleConfirmReceipt = async (t, status, modeOverride) => {
                                                     <div className="text-right shrink-0 ml-2">
                                                         <span className="font-bold block dark:text-white text-lg">{formatMoney(t.amount)}</span>
                                                         <span className="text-[10px] font-bold uppercase text-slate-400">
-                                                            {displayType==='income'?'In':displayType==='expense'?'Out':displayType==='borrowed'?'Debt':'Lent'}
+                                                            {displayType==='income'?'In':
+                                                             displayType==='expense'?'Out':
+                                                             displayType==='borrowed'?'Debt':
+                                                             displayType==='lent'?'Lent':
+                                                             displayType.startsWith('repayment')?'Repay':'Txn'}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -2154,7 +2178,7 @@ const handleConfirmReceipt = async (t, status, modeOverride) => {
         // FIXED: Enhanced Transaction Modal with Smart Split Logic
         function TransactionModal({ user, people, editItem, onClose, theme, mutate, setData, data, fetchData, lastFetchParams, setDialog }) {
             const { showToast } = useToast();
-            const [tab, setTab] = useState(editItem ? (['lent','borrowed','repayment_in','repayment_out'].includes(editItem.type)?'friend':'simple') : 'simple');
+            const [tab, setTab] = useState(editItem ? (['lent','borrowed','repayment_in','repayment_out','repayment_in_prev','repayment_out_prev'].includes(editItem.type)?'friend':'simple') : 'simple');
             const [splitMode, setSplitMode] = useState('equal');
             const [includeMe, setIncludeMe] = useState(true);
             const [selectedFriends, setSelectedFriends] = useState([]);
@@ -2182,7 +2206,7 @@ const handleConfirmReceipt = async (t, status, modeOverride) => {
             const [sendingReminder, setSendingReminder] = useState(false);
             const [reminderToast, setReminderToast] = useState(null);
 
-            const FRIEND_TYPES = ['repayment_in', 'repayment_out'];
+            const FRIEND_TYPES = ['repayment_in', 'repayment_out', 'repayment_in_prev', 'repayment_out_prev'];
             const isLegacyLoanType = form.type === 'lent' || form.type === 'borrowed';
             const legacyLoanLabel = form.type === 'lent' ? 'Money Lent (I gave)' : 'Money Borrowed (I took)';
 
@@ -2885,6 +2909,8 @@ if(items.length === 0) {
                                     <select className="input-field" value={form.type} onChange={e=>setForm({...form, type:e.target.value})} required>
                                         <option value="repayment_in">He Paid Back</option>
                                         <option value="repayment_out">I Paid Back</option>
+                                        <option value="repayment_in_prev">He Paid Back (Prev)</option>
+                                        <option value="repayment_out_prev">I Paid Back (Prev)</option>
                                     </select>
                                 )}
                                 <div className={`bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border ${THEMES[theme].border} border-opacity-20`}>
